@@ -8,3 +8,6 @@ This will make some flows available "off-line" and also allow easy integration w
 
 ### In Progress
 1. Bale recording direct from baler counter 
+
+
+![alt text](https://github.com/Farmer-Eds-Shed/farmOS-Node-Red-Android-Project/blob/main/screenshots/InventoryUI.gif?raw=true)

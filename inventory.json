@@ -476,7 +476,7 @@
         "type": "function",
         "z": "7dc49beefc960324",
         "name": "Process tokens",
-        "func": "var time;\nif (msg.payload.access_token) {\n    var token = msg.payload.access_token;\n    var refresh = msg.payload.refresh_token;\n    var expiry = Date.now() + (msg.payload.expires_in * 1000) - 120000;\n    global.set('farmos_token_expiry', expiry);\n    global.set('token', token);\n    global.set('farmos_refresh', refresh);\n    time = new Date();\n    msg.bearer = msg.payload;\n    msg.payload = \"last sync \" + time;\n} else {\n    msg.error = msg.payload;\n    msg.payload = msg.error.error;\n}\nreturn msg;",
+        "func": "var time;\nif (msg.payload.access_token) {\n    var token = msg.payload.access_token;\n    var refresh = msg.payload.refresh_token;\n    var expiry = Date.now() + (msg.payload.expires_in * 1000) - 120000;\n    global.set('farmos_token_expiry', expiry);\n    global.set('token', token);\n    global.set('farmos_refresh', refresh);\n    time = new Date();\n    msg.bearer = msg.payload;\n    msg.payload = \"Authenticated \" + time;\n} else {\n    msg.error = msg.payload;\n    msg.payload = msg.error.error;\n}\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -534,10 +534,18 @@
         "alpnprotocol": ""
     },
     {
+        "id": "c884171d9a258ae0",
+        "type": "tab",
+        "label": "Bale Inventory",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
         "id": "f8dc4a4b5ab9a3f0",
         "type": "ui_media",
         "z": "c884171d9a258ae0",
-        "group": "bb64494b3b66f953",
+        "group": "183676a5e0bec106",
         "name": "",
         "width": "6",
         "height": "5",
@@ -550,23 +558,232 @@
         "onstart": false,
         "scope": "local",
         "tooltip": "",
-        "x": 990,
+        "x": 1110,
         "y": 140,
         "wires": [
             []
         ]
     },
     {
-        "id": "639963dc91e504fe",
+        "id": "b7a6a816f5f0f176",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Select Inventory",
+        "func": "var token = global.get('token');\nvar i = msg.payload;\nvar inventory = flow.get(\"Inventory\");\n\nif (inventory[i].attributes.inventory.length !=0) {\n    msg.payload = inventory[i].attributes.inventory[0].value;\n    flow.set(\"current_inventory\", inventory[i].attributes.inventory[0].value);\n}\nelse {\n    msg.payload = 0\n    }\n\nmsg.url = inventory[i].relationships.image.links.related.href;\n\nmsg.headers = {};\nmsg.headers['Authorization'] = \"Bearer \" + token;\nmsg.headers['Accept'] = \"application/vnd.api+json\";\nmsg.headers['content-type'] = 'application/vnd.api+json';\n\nmsg.selected = inventory[i]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1280,
+        "y": 380,
+        "wires": [
+            [
+                "194e455602e6b268",
+                "d4eebf56e6c949a6"
+            ]
+        ]
+    },
+    {
+        "id": "194e455602e6b268",
+        "type": "ui_text",
+        "z": "c884171d9a258ae0",
+        "group": "183676a5e0bec106",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Current Stock",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 1500,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "c0dc7e588a86cc58",
+        "type": "http request",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 610,
+        "y": 140,
+        "wires": [
+            [
+                "b63d5ea0941c4774"
+            ]
+        ]
+    },
+    {
+        "id": "9f1d33e0e36ac883",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Get Image",
+        "func": "var image = msg.payload.data[0].attributes.uri.url;\nmsg.src = global.get(\"farmOSurl\") + image;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 930,
+        "y": 120,
+        "wires": [
+            [
+                "f8dc4a4b5ab9a3f0"
+            ]
+        ]
+    },
+    {
+        "id": "ea9d97eb7121716c",
+        "type": "link in",
+        "z": "c884171d9a258ae0",
+        "name": "Reset 1",
+        "links": [
+            "b7add68b19389e70"
+        ],
+        "x": 1215,
+        "y": 420,
+        "wires": [
+            [
+                "438e9a149adf654f"
+            ]
+        ]
+    },
+    {
+        "id": "438e9a149adf654f",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Reset",
+        "func": "msg.payload = \"Select Inventory\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1310,
+        "y": 420,
+        "wires": [
+            [
+                "194e455602e6b268"
+            ]
+        ]
+    },
+    {
+        "id": "53c4432220db7e83",
+        "type": "link in",
+        "z": "c884171d9a258ae0",
+        "name": "Reset 2",
+        "links": [
+            "b7add68b19389e70"
+        ],
+        "x": 805,
+        "y": 180,
+        "wires": [
+            [
+                "2bad50e8b8f94a42"
+            ]
+        ]
+    },
+    {
+        "id": "2bad50e8b8f94a42",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Reset Image",
+        "func": "msg.payload = {\n    category: \"Bales\",\n    name: \"istockphoto-1164916650-612x612.jpg\"\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 930,
+        "y": 160,
+        "wires": [
+            [
+                "f8dc4a4b5ab9a3f0"
+            ]
+        ]
+    },
+    {
+        "id": "b63d5ea0941c4774",
+        "type": "switch",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "property": "msg.payload.data[0].attributes",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "hask",
+                "v": "uri",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 770,
+        "y": 140,
+        "wires": [
+            [
+                "9f1d33e0e36ac883"
+            ],
+            [
+                "2bad50e8b8f94a42"
+            ]
+        ]
+    },
+    {
+        "id": "71ca6bdb6e31dab9",
+        "type": "ui_numeric",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "label": "Amount to Use",
+        "tooltip": "",
+        "group": "183676a5e0bec106",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "wrap": false,
+        "passthru": false,
+        "topic": "topic",
+        "topicType": "msg",
+        "format": "{{value}}",
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "className": "",
+        "x": 840,
+        "y": 740,
+        "wires": [
+            [
+                "fb65c18cd4b6e542"
+            ]
+        ]
+    },
+    {
+        "id": "23a30ff6558fe659",
         "type": "ui_button",
         "z": "c884171d9a258ae0",
         "name": "",
-        "group": "bb64494b3b66f953",
-        "order": 1,
+        "group": "183676a5e0bec106",
+        "order": 6,
         "width": 0,
         "height": 0,
         "passthru": false,
-        "label": "Sync with farmOS",
+        "label": "Use From Stock",
         "tooltip": "",
         "color": "",
         "bgcolor": "",
@@ -576,8 +793,100 @@
         "payloadType": "str",
         "topic": "topic",
         "topicType": "msg",
-        "x": 120,
-        "y": 380,
+        "x": 640,
+        "y": 840,
+        "wires": [
+            [
+                "0ee9f5bf9f4ab924"
+            ]
+        ]
+    },
+    {
+        "id": "d4eebf56e6c949a6",
+        "type": "link out",
+        "z": "c884171d9a258ae0",
+        "name": "Selected Inventory",
+        "mode": "link",
+        "links": [
+            "a0638a392ca8ced0",
+            "5c34221539f21595"
+        ],
+        "x": 1435,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "a0638a392ca8ced0",
+        "type": "link in",
+        "z": "c884171d9a258ae0",
+        "name": "Images",
+        "links": [
+            "d4eebf56e6c949a6"
+        ],
+        "x": 465,
+        "y": 140,
+        "wires": [
+            [
+                "c0dc7e588a86cc58"
+            ]
+        ]
+    },
+    {
+        "id": "5c34221539f21595",
+        "type": "link in",
+        "z": "c884171d9a258ae0",
+        "name": "link in 1",
+        "links": [
+            "d4eebf56e6c949a6"
+        ],
+        "x": 915,
+        "y": 640,
+        "wires": [
+            [
+                "7b5b6ca9cb1af5dc",
+                "935602b9f785f544"
+            ]
+        ]
+    },
+    {
+        "id": "7b5b6ca9cb1af5dc",
+        "type": "debug",
+        "z": "c884171d9a258ae0",
+        "name": "debug 1",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "selected",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1060,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "639963dc91e504fe",
+        "type": "ui_button",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "group": "183676a5e0bec106",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Re-authenticate",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 240,
+        "y": 400,
         "wires": [
             [
                 "0b57ae9fc105d565",
@@ -593,7 +902,7 @@
         "label": "Inventory",
         "tooltip": "",
         "place": "Select option",
-        "group": "bb64494b3b66f953",
+        "group": "183676a5e0bec106",
         "order": 4,
         "width": 0,
         "height": 0,
@@ -604,7 +913,7 @@
         "topic": "topic",
         "topicType": "msg",
         "className": "",
-        "x": 860,
+        "x": 1080,
         "y": 380,
         "wires": [
             [
@@ -616,7 +925,7 @@
         "id": "e15570ec50aed753",
         "type": "ui_text",
         "z": "c884171d9a258ae0",
-        "group": "bb64494b3b66f953",
+        "group": "183676a5e0bec106",
         "order": 2,
         "width": 0,
         "height": 0,
@@ -626,7 +935,7 @@
         "layout": "row-spread",
         "className": "",
         "x": 510,
-        "y": 340,
+        "y": 400,
         "wires": []
     },
     {
@@ -670,12 +979,14 @@
                 "type": "cred"
             }
         ],
-        "x": 330,
-        "y": 380,
+        "x": 470,
+        "y": 440,
         "wires": [
             [
                 "e15570ec50aed753",
-                "c528f46f0434709c"
+                "c528f46f0434709c",
+                "68200a9b41e4e324",
+                "fde69e0ac83e642b"
             ],
             []
         ]
@@ -684,7 +995,7 @@
         "id": "c528f46f0434709c",
         "type": "subflow:949541c9b70110d5",
         "z": "c884171d9a258ae0",
-        "name": "",
+        "name": "Get Inventory ",
         "env": [
             {
                 "name": "API",
@@ -697,8 +1008,8 @@
                 "type": "str"
             }
         ],
-        "x": 530,
-        "y": 380,
+        "x": 700,
+        "y": 400,
         "wires": [
             [
                 "b527dbe605749e17"
@@ -716,91 +1027,12 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 700,
-        "y": 380,
-        "wires": [
-            [
-                "5dfcd17dc5de88c3"
-            ]
-        ]
-    },
-    {
-        "id": "b7a6a816f5f0f176",
-        "type": "function",
-        "z": "c884171d9a258ae0",
-        "name": "Select Inventory",
-        "func": "var token = global.get('token');\nvar i = msg.payload;\nvar inventory = flow.get(\"Inventory\");\nmsg.payload = inventory[i].attributes.inventory[0].value;\n\nmsg.url = inventory[i].relationships.image.links.related.href;\n\nmsg.headers = {};\nmsg.headers['Authorization'] = \"Bearer \" + token;\nmsg.headers['Accept'] = \"application/vnd.api+json\";\nmsg.headers['content-type'] = 'application/vnd.api+json';\n\nmsg.selected = inventory[i]\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1020,
-        "y": 380,
-        "wires": [
-            [
-                "194e455602e6b268",
-                "d4eebf56e6c949a6"
-            ]
-        ]
-    },
-    {
-        "id": "194e455602e6b268",
-        "type": "ui_text",
-        "z": "c884171d9a258ae0",
-        "group": "bb64494b3b66f953",
-        "order": 5,
-        "width": 0,
-        "height": 0,
-        "name": "",
-        "label": "Current Stock",
-        "format": "{{msg.payload}}",
-        "layout": "row-spread",
-        "className": "",
-        "x": 1240,
+        "x": 900,
         "y": 400,
-        "wires": []
-    },
-    {
-        "id": "c0dc7e588a86cc58",
-        "type": "http request",
-        "z": "c884171d9a258ae0",
-        "name": "",
-        "method": "GET",
-        "ret": "obj",
-        "paytoqs": "ignore",
-        "url": "",
-        "tls": "",
-        "persist": false,
-        "proxy": "",
-        "insecureHTTPParser": false,
-        "authType": "",
-        "senderr": false,
-        "headers": [],
-        "x": 490,
-        "y": 140,
         "wires": [
             [
-                "b63d5ea0941c4774"
-            ]
-        ]
-    },
-    {
-        "id": "9f1d33e0e36ac883",
-        "type": "function",
-        "z": "c884171d9a258ae0",
-        "name": "Get Image",
-        "func": "var image = msg.payload.data[0].attributes.uri.url;\nmsg.src = \"https://\" + global.get(\"farmOSurl\") + image;\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 810,
-        "y": 120,
-        "wires": [
-            [
-                "f8dc4a4b5ab9a3f0"
+                "5dfcd17dc5de88c3",
+                "91b11f039bfd8a23"
             ]
         ]
     },
@@ -814,148 +1046,21 @@
             "53c4432220db7e83",
             "ea9d97eb7121716c"
         ],
-        "x": 255,
-        "y": 340,
+        "x": 405,
+        "y": 380,
         "wires": []
     },
     {
-        "id": "ea9d97eb7121716c",
-        "type": "link in",
-        "z": "c884171d9a258ae0",
-        "name": "Reset 1",
-        "links": [
-            "b7add68b19389e70"
-        ],
-        "x": 955,
-        "y": 420,
-        "wires": [
-            [
-                "438e9a149adf654f"
-            ]
-        ]
-    },
-    {
-        "id": "438e9a149adf654f",
-        "type": "function",
-        "z": "c884171d9a258ae0",
-        "name": "Reset",
-        "func": "msg.payload = \"Select Inventory\";\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1050,
-        "y": 420,
-        "wires": [
-            [
-                "194e455602e6b268"
-            ]
-        ]
-    },
-    {
-        "id": "53c4432220db7e83",
-        "type": "link in",
-        "z": "c884171d9a258ae0",
-        "name": "Reset 2",
-        "links": [
-            "b7add68b19389e70"
-        ],
-        "x": 685,
-        "y": 180,
-        "wires": [
-            [
-                "2bad50e8b8f94a42"
-            ]
-        ]
-    },
-    {
-        "id": "2bad50e8b8f94a42",
-        "type": "function",
-        "z": "c884171d9a258ae0",
-        "name": "Reset Image",
-        "func": "msg.payload = {\n    category: \"Bales\",\n    name: \"istockphoto-1164916650-612x612.jpg\"\n}\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 810,
-        "y": 160,
-        "wires": [
-            [
-                "f8dc4a4b5ab9a3f0"
-            ]
-        ]
-    },
-    {
-        "id": "b63d5ea0941c4774",
-        "type": "switch",
-        "z": "c884171d9a258ae0",
-        "name": "",
-        "property": "msg.payload.data[0].attributes",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "hask",
-                "v": "uri",
-                "vt": "str"
-            },
-            {
-                "t": "else"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 2,
-        "x": 650,
-        "y": 140,
-        "wires": [
-            [
-                "9f1d33e0e36ac883"
-            ],
-            [
-                "2bad50e8b8f94a42"
-            ]
-        ]
-    },
-    {
-        "id": "71ca6bdb6e31dab9",
-        "type": "ui_numeric",
-        "z": "c884171d9a258ae0",
-        "name": "",
-        "label": "Amount to Use",
-        "tooltip": "",
-        "group": "bb64494b3b66f953",
-        "order": 6,
-        "width": 0,
-        "height": 0,
-        "wrap": false,
-        "passthru": true,
-        "topic": "topic",
-        "topicType": "msg",
-        "format": "{{value}}",
-        "min": 0,
-        "max": 10,
-        "step": 1,
-        "className": "",
-        "x": 400,
-        "y": 640,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "23a30ff6558fe659",
+        "id": "988940f5317bb144",
         "type": "ui_button",
         "z": "c884171d9a258ae0",
         "name": "",
-        "group": "bb64494b3b66f953",
-        "order": 6,
+        "group": "374b281af3b5b380",
+        "order": 1,
         "width": 0,
         "height": 0,
         "passthru": false,
-        "label": "Use From Stock",
+        "label": "Re-authenticate",
         "tooltip": "",
         "color": "",
         "bgcolor": "",
@@ -965,80 +1070,525 @@
         "payloadType": "str",
         "topic": "topic",
         "topicType": "msg",
-        "x": 400,
+        "x": 240,
+        "y": 480,
+        "wires": [
+            [
+                "0b57ae9fc105d565"
+            ]
+        ]
+    },
+    {
+        "id": "91b11f039bfd8a23",
+        "type": "ui_dropdown",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "label": "Inventory",
+        "tooltip": "",
+        "place": "Select option",
+        "group": "374b281af3b5b380",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "multiple": false,
+        "options": [],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 1080,
+        "y": 480,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "68200a9b41e4e324",
+        "type": "ui_text",
+        "z": "c884171d9a258ae0",
+        "group": "374b281af3b5b380",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 510,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "ba0078c02a0550c3",
+        "type": "ui_media",
+        "z": "c884171d9a258ae0",
+        "group": "374b281af3b5b380",
+        "name": "",
+        "width": "6",
+        "height": "4",
+        "order": 3,
+        "category": "Bales",
+        "file": "istockphoto-1164916650-612x612.jpg",
+        "layout": "adjust",
+        "showcontrols": true,
+        "loop": true,
+        "onstart": false,
+        "scope": "local",
+        "tooltip": "",
+        "x": 310,
+        "y": 660,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7b360585e4e97755",
+        "type": "ui_numeric",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "label": "Bale Count",
+        "tooltip": "",
+        "group": "374b281af3b5b380",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "wrap": false,
+        "passthru": true,
+        "topic": "topic",
+        "topicType": "msg",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "200",
+        "step": 1,
+        "className": "",
+        "x": 330,
         "y": 700,
         "wires": [
             []
         ]
     },
     {
-        "id": "d4eebf56e6c949a6",
-        "type": "link out",
+        "id": "cdbaf634471268c2",
+        "type": "ui_button",
         "z": "c884171d9a258ae0",
-        "name": "Selected Inventory",
-        "mode": "link",
-        "links": [
-            "a0638a392ca8ced0",
-            "5c34221539f21595"
-        ],
-        "x": 1175,
-        "y": 360,
-        "wires": []
+        "name": "",
+        "group": "374b281af3b5b380",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Save Harvest",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "green",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 340,
+        "y": 860,
+        "wires": [
+            []
+        ]
     },
     {
-        "id": "a0638a392ca8ced0",
-        "type": "link in",
+        "id": "5883ff13f8d30b28",
+        "type": "ui_button",
         "z": "c884171d9a258ae0",
-        "name": "Images",
-        "links": [
-            "d4eebf56e6c949a6"
-        ],
-        "x": 375,
-        "y": 140,
+        "name": "",
+        "group": "374b281af3b5b380",
+        "order": 7,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Reset Counter",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "red",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 340,
+        "y": 780,
         "wires": [
             [
-                "c0dc7e588a86cc58"
+                "5798b102b5de0b94"
             ]
         ]
     },
     {
-        "id": "5c34221539f21595",
-        "type": "link in",
+        "id": "4f51d0d2bb1d390d",
+        "type": "ui_text_input",
         "z": "c884171d9a258ae0",
-        "name": "link in 1",
-        "links": [
-            "d4eebf56e6c949a6"
-        ],
-        "x": 295,
-        "y": 540,
+        "name": "",
+        "label": "Field Name",
+        "tooltip": "",
+        "group": "374b281af3b5b380",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "mode": "text",
+        "delay": 300,
+        "topic": "topic",
+        "sendOnBlur": true,
+        "className": "",
+        "topicType": "msg",
+        "x": 330,
+        "y": 820,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5798b102b5de0b94",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Reset",
+        "func": "msg.payload = 0;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 740,
         "wires": [
             [
-                "7b5b6ca9cb1af5dc"
+                "7b360585e4e97755"
             ]
         ]
     },
     {
-        "id": "7b5b6ca9cb1af5dc",
+        "id": "c583a4ed99fa4160",
+        "type": "sf:949541c9b70110d5",
+        "z": "c884171d9a258ae0",
+        "name": "Get Unit Terms",
+        "API": "taxonomy_term/unit",
+        "Method": "GET",
+        "x": 700,
+        "y": 480,
+        "wires": [
+            [
+                "638c3d5c2a2d259a"
+            ]
+        ]
+    },
+    {
+        "id": "638c3d5c2a2d259a",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Store Unit terms",
+        "func": "var array = flow.get('unit_terms') || [];\nvar name;\nvar id;\n\nmsg.payload.data.forEach(data => {\nname = data.attributes.name;\nid = data.id;\narray.push({id:id,name:name});\n})\n\nflow.set(\"unit_terms\", array);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 700,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "935602b9f785f544",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Select Quantity",
+        "func": "if (msg.selected.attributes.inventory.length != 0) {\nvar unit = msg.selected.attributes.inventory[0].units\nvar unit_terms = flow.get(\"unit_terms\");\nvar unit_id = null;\nvar asset_id = msg.selected.id\n\n//Search for unit term uuid\nunit_terms.forEach(data => {\n    if (data.name == unit) {\n        unit_id = data.id;\n    }\n})\n\nflow.set(\"unit_id\" , unit_id);\n}\nflow.set(\"asset_id\", asset_id);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1040,
+        "y": 700,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fde69e0ac83e642b",
+        "type": "change",
+        "z": "c884171d9a258ae0",
+        "name": "Clear Variables",
+        "rules": [
+            {
+                "t": "delete",
+                "p": "unit_terms",
+                "pt": "flow"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 700,
+        "y": 440,
+        "wires": [
+            [
+                "c583a4ed99fa4160"
+            ]
+        ]
+    },
+    {
+        "id": "fb65c18cd4b6e542",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Select Amount",
+        "func": "flow.set(\"amount\", msg.payload)\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1040,
+        "y": 740,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0ee9f5bf9f4ab924",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Quantity json",
+        "func": "var unit_id = flow.get(\"unit_id\");\nvar numerator = flow.get(\"amount\");\nvar asset_id = flow.get(\"asset_id\");\n\n\nif (unit_id != null && numerator != 0) {\n    //Create Asset Object \n    msg.payload = {\n        \"data\": {\n            \"type\": \"quantity--material\",\n            \"attributes\": {\n                \"measure\": \"count\",\n                \"value\": {\n                    \"numerator\": numerator,\n                    \"denominator\": 1\n                },\n                \"inventory_adjustment\": \"decrement\"\n            },\n            \"relationships\": {\n                \"inventory_asset\": {\n                    \"data\": {\n                        \"type\": \"asset--material\",\n                        \"id\": asset_id,\n                    }\n                },\n                \"units\": {\n                    \"data\": {\n                        \"type\": \"taxonomy_term--unit\",\n                        \"id\": unit_id\n                    }\n                }\n            }\n        }\n\n    }\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 830,
+        "y": 840,
+        "wires": [
+            [
+                "2a4efd815e5d4272"
+            ]
+        ]
+    },
+    {
+        "id": "2ad00971d2cfb28e",
+        "type": "sf:949541c9b70110d5",
+        "z": "c884171d9a258ae0",
+        "name": "Post Quantity",
+        "API": "quantity/material",
+        "Method": "POST",
+        "x": 1160,
+        "y": 840,
+        "wires": [
+            [
+                "12fb55ef18803cd5"
+            ]
+        ]
+    },
+    {
+        "id": "73d56aa4f7c70410",
+        "type": "inject",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "0",
+        "payloadType": "str",
+        "x": 690,
+        "y": 740,
+        "wires": [
+            [
+                "71ca6bdb6e31dab9"
+            ]
+        ]
+    },
+    {
+        "id": "2a4efd815e5d4272",
+        "type": "switch",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "hask",
+                "v": "data",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 990,
+        "y": 840,
+        "wires": [
+            [
+                "2ad00971d2cfb28e"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "272ae72ee625087a",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "log json",
+        "func": "var asset_id = flow.get(\"asset_id\");\nvar material_id = msg.payload.data.id;\nvar amount = flow.get(\"amount\");\nvar unit_terms = flow.get(\"unit_terms\");\nvar unit_id = msg.payload.data.relationships.units.data.id;\nvar units;\n\n//Search for unit term uuid\nunit_terms.forEach(data => {\n    if (data.id == unit_id) {\n        units = data.name;\n    }\n})\n\n\n\nmsg.payload = {\n    \"data\": {\n        \"type\": \"log--activity\",\n        \"attributes\": {\n            \"name\": \"Used \" + amount + \" \" + units,\n            \"status\": \"done\"\n        },\n        \"relationships\": {\n            \"asset\": {\n                \"data\": [\n                    {\n                        \"type\": \"asset--material\",\n                        \"id\": asset_id\n                    }\n                ]\n            },\n            \"quantity\": {\n                \"data\": [\n                    {\n                        \"type\": \"quantity--standard\",\n                        \"id\": material_id\n                    }\n\n                ]\n            }\n        }\n    }\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 940,
+        "wires": [
+            [
+                "f53c8c1fde1848bd"
+            ]
+        ]
+    },
+    {
+        "id": "077c526aefa38ef9",
+        "type": "sf:949541c9b70110d5",
+        "z": "c884171d9a258ae0",
+        "name": "Post log",
+        "API": "log/activity",
+        "Method": "POST",
+        "x": 1140,
+        "y": 940,
+        "wires": [
+            [
+                "b582c369eef4703c"
+            ]
+        ]
+    },
+    {
+        "id": "f53c8c1fde1848bd",
+        "type": "switch",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "hask",
+                "v": "data",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 990,
+        "y": 940,
+        "wires": [
+            [
+                "077c526aefa38ef9"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "12fb55ef18803cd5",
+        "type": "switch",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "hask",
+                "v": "data",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 670,
+        "y": 900,
+        "wires": [
+            [
+                "272ae72ee625087a",
+                "3e7eea41ad56aaa1"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "3e7eea41ad56aaa1",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Update stock",
+        "func": "var numerator = msg.payload.data.attributes.value.numerator;\nvar current_inventory = flow.get(\"current_inventory\");\nmsg.payload = current_inventory - numerator;\nflow.set(\"current_inventory\", current_inventory - numerator );\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1330,
+        "y": 900,
+        "wires": [
+            [
+                "194e455602e6b268"
+            ]
+        ]
+    },
+    {
+        "id": "b582c369eef4703c",
         "type": "debug",
         "z": "c884171d9a258ae0",
-        "name": "debug 1",
+        "name": "debug 5",
         "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
-        "complete": "selected",
-        "targetType": "msg",
+        "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 400,
-        "y": 540,
+        "x": 1320,
+        "y": 940,
         "wires": []
     },
     {
-        "id": "bb64494b3b66f953",
+        "id": "183676a5e0bec106",
         "type": "ui_group",
-        "name": "farmOS Inventory",
-        "tab": "21b2e98f0aa9628d",
+        "name": "Inventory",
+        "tab": "9f097e866a06dd9a",
+        "order": 3,
+        "disp": false,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "374b281af3b5b380",
+        "type": "ui_group",
+        "name": "Baler",
+        "tab": "41cf5817ef28283e",
         "order": 1,
         "disp": false,
         "width": "6",
@@ -1046,11 +1596,20 @@
         "className": ""
     },
     {
-        "id": "21b2e98f0aa9628d",
+        "id": "9f097e866a06dd9a",
         "type": "ui_tab",
-        "name": "farmOS Inventory",
-        "icon": "fa-leaf",
+        "name": "Inventory",
+        "icon": "dashboard",
         "order": 1,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "41cf5817ef28283e",
+        "type": "ui_tab",
+        "name": "Baler Counter",
+        "icon": "fa-leaf",
+        "order": 2,
         "disabled": false,
         "hidden": false
     }

@@ -1,0 +1,3230 @@
+[
+    {
+        "id": "124025c69c7edc12",
+        "type": "subflow",
+        "name": "farmOS GET",
+        "info": "",
+        "category": "farmOS V2",
+        "in": [
+            {
+                "x": 60,
+                "y": 160,
+                "wires": [
+                    {
+                        "id": "51b419f6e669c1e7"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 1320,
+                "y": 180,
+                "wires": [
+                    {
+                        "id": "e3c689b2ae50ad5f",
+                        "port": 0
+                    },
+                    {
+                        "id": "a6601b48109aa51f",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [
+            {
+                "name": "Source",
+                "type": "str",
+                "value": "path",
+                "ui": {
+                    "label": {
+                        "en-US": "API Source"
+                    },
+                    "type": "select",
+                    "opts": {
+                        "opts": [
+                            {
+                                "l": {
+                                    "en-US": "Load from Global Variable"
+                                },
+                                "v": "global"
+                            },
+                            {
+                                "l": {
+                                    "en-US": "Load from Flow Variable"
+                                },
+                                "v": "flow"
+                            },
+                            {
+                                "l": {
+                                    "en-US": "Enter below"
+                                },
+                                "v": "path"
+                            },
+                            {
+                                "l": {
+                                    "en-US": "msg.payload"
+                                },
+                                "v": "msgpay"
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "name": "API",
+                "type": "str",
+                "value": "",
+                "ui": {
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "str"
+                        ]
+                    }
+                }
+            },
+            {
+                "name": "filter_source",
+                "type": "str",
+                "value": "none",
+                "ui": {
+                    "label": {
+                        "en-US": "Filter Source"
+                    },
+                    "type": "select",
+                    "opts": {
+                        "opts": [
+                            {
+                                "l": {
+                                    "en-US": "Load from Global Variable"
+                                },
+                                "v": "global"
+                            },
+                            {
+                                "l": {
+                                    "en-US": "Load from Flow Variable"
+                                },
+                                "v": "flow"
+                            },
+                            {
+                                "l": {
+                                    "en-US": "Enter below"
+                                },
+                                "v": "enter"
+                            },
+                            {
+                                "l": {
+                                    "en-US": "N/A"
+                                },
+                                "v": "none"
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "name": "Filter",
+                "type": "str",
+                "value": "",
+                "ui": {
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "str"
+                        ]
+                    }
+                }
+            }
+        ],
+        "meta": {},
+        "color": "#C7E9C0",
+        "icon": "font-awesome/fa-leaf"
+    },
+    {
+        "id": "0774efd348c1e5a2",
+        "type": "function",
+        "z": "124025c69c7edc12",
+        "name": "path",
+        "func": "var token = global.get('token');\nvar api = env.get('API');\nvar filter_source = env.get('filter_source');\nconst filter = msg.payload;\n\nmsg.headers = {};\nmsg.headers['Authorization'] = \"Bearer \"+token;\nmsg.headers['Accept'] = \"application/vnd.api+json\";\nmsg.headers['content-type'] = 'application/vnd.api+json';\n\nif (filter != null && filter.includes(\"filter\")) {\nmsg.url = global.get('farmOSurl').concat('/api/' + api  + '?' + filter);\n}\nelse {\nmsg.url = global.get('farmOSurl').concat('/api/' + api);   \n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 120,
+        "wires": [
+            [
+                "a7ba63c30a4852fa"
+            ]
+        ]
+    },
+    {
+        "id": "a7ba63c30a4852fa",
+        "type": "http request",
+        "z": "124025c69c7edc12",
+        "name": "",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "body",
+        "url": "",
+        "tls": "069ccad11d9d3d4d",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 970,
+        "y": 180,
+        "wires": [
+            [
+                "e3c689b2ae50ad5f"
+            ]
+        ]
+    },
+    {
+        "id": "e3c689b2ae50ad5f",
+        "type": "function",
+        "z": "124025c69c7edc12",
+        "name": "Check for next",
+        "func": "var token = global.get('token');\nmsg.headers = {\n    Authorization: \"Bearer \"+token\n}\n\n\nif (msg.payload.links != null && msg.payload.links.hasOwnProperty(\"next\")){\n    msg.url = msg.payload.links.next.href;\n\n}else{\n    msg.url = null;\n    msg.complete = \"complete\";\n}\n\nif (msg.payload.links != null){\nconst endpoints = msg.payload.links;\nconst keys = Object.keys(endpoints);\nmsg.options = keys;\n}\n\nif (msg.statusCode == \"404\"){\n    msg.payload = \"Not Found, Check url / enpoints are valid\"\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1160,
+        "y": 180,
+        "wires": [
+            [
+                "663bfcfc084711eb"
+            ]
+        ]
+    },
+    {
+        "id": "663bfcfc084711eb",
+        "type": "switch",
+        "z": "124025c69c7edc12",
+        "name": "",
+        "property": "url",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "nnull"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1050,
+        "y": 120,
+        "wires": [
+            [
+                "a7ba63c30a4852fa"
+            ]
+        ]
+    },
+    {
+        "id": "27a51bf8cd177350",
+        "type": "switch",
+        "z": "124025c69c7edc12",
+        "name": "Select endpoint",
+        "property": "Source",
+        "propertyType": "env",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "path",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "global",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "flow",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "msgpay",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 4,
+        "x": 600,
+        "y": 180,
+        "wires": [
+            [
+                "0774efd348c1e5a2"
+            ],
+            [
+                "ab1e3abfa3a51ccf"
+            ],
+            [
+                "5aae0d8834897234"
+            ],
+            [
+                "48bb93bcf1e6a80d"
+            ]
+        ]
+    },
+    {
+        "id": "ab1e3abfa3a51ccf",
+        "type": "function",
+        "z": "124025c69c7edc12",
+        "name": "global",
+        "func": "var token = global.get('token');\nvar global_api = global.get(env.get('API'));\nvar parts = global_api.split(\"--\");\nvar api = parts[0] + \"/\" + parts[1];\nconst filter = flow.get('filter');\n\n\n\nmsg.headers = {};\nmsg.headers['Authorization'] = \"Bearer \"+token;\nmsg.headers['Accept'] = \"application/vnd.api+json\";\nmsg.headers['content-type'] = 'application/vnd.api+json';\n\nif (filter != null && filter.includes(\"filter\")) {\nmsg.url = global.get('farmOSurl').concat('/api/' + api  + '?' + filter);\n}\nelse {\nmsg.url = global.get('farmOSurl').concat('/api/' + api);   \n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 160,
+        "wires": [
+            [
+                "a7ba63c30a4852fa"
+            ]
+        ]
+    },
+    {
+        "id": "5aae0d8834897234",
+        "type": "function",
+        "z": "124025c69c7edc12",
+        "name": "flow",
+        "func": "var token = global.get('token');\nvar flow_api = flow.get(\"$parent.\"+ env.get('API'));\nvar parts = flow_api.split(\"--\");\nvar api = parts[0] + \"/\" + parts[1];\nconst filter = flow.get('filter');\n\n\n\nmsg.headers = {};\nmsg.headers['Authorization'] = \"Bearer \"+token;\nmsg.headers['Accept'] = \"application/vnd.api+json\";\nmsg.headers['content-type'] = 'application/vnd.api+json';\n\nif (filter != null && filter.includes(\"filter\")) {\nmsg.url = global.get('farmOSurl').concat('/api/' + api  + '?' + filter);\n}\nelse {\nmsg.url = global.get('farmOSurl').concat('/api/' + api);   \n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 200,
+        "wires": [
+            [
+                "a7ba63c30a4852fa"
+            ]
+        ]
+    },
+    {
+        "id": "48bb93bcf1e6a80d",
+        "type": "function",
+        "z": "124025c69c7edc12",
+        "name": "msg",
+        "func": "var token = global.get('token');\nvar api = msg.payload\n\nmsg.headers = {};\nmsg.headers['Authorization'] = \"Bearer \"+token;\nmsg.headers['Accept'] = \"application/vnd.api+json\";\nmsg.headers['content-type'] = 'application/vnd.api+json';\n\nmsg.url = global.get('farmOSurl').concat('/api/' + api);   \n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 240,
+        "wires": [
+            [
+                "a7ba63c30a4852fa"
+            ]
+        ]
+    },
+    {
+        "id": "51b419f6e669c1e7",
+        "type": "switch",
+        "z": "124025c69c7edc12",
+        "name": "select filter",
+        "property": "filter_source",
+        "propertyType": "env",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "enter",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "global",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "flow",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "none",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 4,
+        "x": 190,
+        "y": 160,
+        "wires": [
+            [
+                "2e23c915ea632245"
+            ],
+            [
+                "7e467dc4ad1d06e2"
+            ],
+            [
+                "defbe3e39b24bb9f"
+            ],
+            [
+                "27a51bf8cd177350"
+            ]
+        ]
+    },
+    {
+        "id": "2e23c915ea632245",
+        "type": "function",
+        "z": "124025c69c7edc12",
+        "name": "enter",
+        "func": "filter = env.get('Filter');\nflow.set('filter',filter);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 60,
+        "wires": [
+            [
+                "27a51bf8cd177350"
+            ]
+        ]
+    },
+    {
+        "id": "7e467dc4ad1d06e2",
+        "type": "function",
+        "z": "124025c69c7edc12",
+        "name": "global",
+        "func": "filter = global.get(env.get('Filter'));\nflow.set('filter',filter);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 100,
+        "wires": [
+            [
+                "27a51bf8cd177350"
+            ]
+        ]
+    },
+    {
+        "id": "defbe3e39b24bb9f",
+        "type": "function",
+        "z": "124025c69c7edc12",
+        "name": "flow",
+        "func": "filter = flow.get(\"$parent.\"+env.get('Filter'));\nflow.set('filter',filter);\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 140,
+        "wires": [
+            [
+                "27a51bf8cd177350"
+            ]
+        ]
+    },
+    {
+        "id": "a6601b48109aa51f",
+        "type": "catch",
+        "z": "124025c69c7edc12",
+        "name": "",
+        "scope": null,
+        "uncaught": false,
+        "x": 1140,
+        "y": 260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "069ccad11d9d3d4d",
+        "type": "tls-config",
+        "z": "124025c69c7edc12",
+        "name": "",
+        "cert": "",
+        "key": "",
+        "ca": "",
+        "certname": "",
+        "keyname": "",
+        "caname": "",
+        "servername": "",
+        "verifyservercert": false,
+        "alpnprotocol": ""
+    },
+    {
+        "id": "949541c9b70110d5",
+        "type": "subflow",
+        "name": "farmOS API",
+        "info": "",
+        "category": "farmOS V2",
+        "in": [
+            {
+                "x": 40,
+                "y": 160,
+                "wires": [
+                    {
+                        "id": "524b513df6c48f0b"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 900,
+                "y": 160,
+                "wires": [
+                    {
+                        "id": "c49aabb103815f36",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [
+            {
+                "name": "API",
+                "type": "str",
+                "value": ""
+            },
+            {
+                "name": "Method",
+                "type": "str",
+                "value": "",
+                "ui": {
+                    "type": "select",
+                    "opts": {
+                        "opts": [
+                            {
+                                "l": {
+                                    "en-US": "GET"
+                                },
+                                "v": "GET"
+                            },
+                            {
+                                "l": {
+                                    "en-US": "POST"
+                                },
+                                "v": "POST"
+                            },
+                            {
+                                "l": {
+                                    "en-US": "PATCH"
+                                },
+                                "v": "PATCH"
+                            },
+                            {
+                                "l": {
+                                    "en-US": "DELETE"
+                                },
+                                "v": "DELETE"
+                            },
+                            {
+                                "l": {
+                                    "en-US": "Set by msg.method"
+                                },
+                                "v": "setbymsg"
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "meta": {},
+        "color": "#C7E9C0",
+        "icon": "font-awesome/fa-leaf"
+    },
+    {
+        "id": "524b513df6c48f0b",
+        "type": "function",
+        "z": "949541c9b70110d5",
+        "name": "API",
+        "func": "var token = global.get('token');\nvar api = env.get('API');\nvar method = env.get('Method')\n\n\nmsg.headers = {};\nmsg.headers['Authorization'] = \"Bearer \"+token;\nmsg.headers['Accept'] = \"application/vnd.api+json\";\nmsg.headers['content-type'] = 'application/vnd.api+json';\n\nmsg.url = global.get('farmOSurl').concat('/api/' + api);\nif (method == \"PATCH\" || method == \"DELETE\" ) {\nvar UUID = msg.payload.data.id;\nmsg.url = global.get('farmOSurl').concat('/api/' + api +'/' + UUID);\n} \n\nmsg.method = method;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 160,
+        "wires": [
+            [
+                "03cfe11edd83927d"
+            ]
+        ]
+    },
+    {
+        "id": "03cfe11edd83927d",
+        "type": "http request",
+        "z": "949541c9b70110d5",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 490,
+        "y": 160,
+        "wires": [
+            [
+                "c49aabb103815f36"
+            ]
+        ]
+    },
+    {
+        "id": "c49aabb103815f36",
+        "type": "function",
+        "z": "949541c9b70110d5",
+        "name": "Check for next",
+        "func": "var token = global.get('token');\nmsg.headers = {\n    Authorization: \"Bearer \"+token\n}\n\n\nif (msg.payload.links.hasOwnProperty(\"next\")){\n    msg.url = msg.payload.links.next.href;\n    msg.method = \"GET\";\n}else{\n    msg.url = null;\n    msg.complete = \"complete\";\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 680,
+        "y": 160,
+        "wires": [
+            [
+                "4a41f840f045b6fc"
+            ]
+        ]
+    },
+    {
+        "id": "4a41f840f045b6fc",
+        "type": "switch",
+        "z": "949541c9b70110d5",
+        "name": "",
+        "property": "url",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "nnull"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 570,
+        "y": 80,
+        "wires": [
+            [
+                "03cfe11edd83927d"
+            ]
+        ]
+    },
+    {
+        "id": "7dc49beefc960324",
+        "type": "subflow",
+        "name": "farmOS Oauth2V2",
+        "info": "",
+        "category": "farmOS V2",
+        "in": [
+            {
+                "x": 60,
+                "y": 260,
+                "wires": [
+                    {
+                        "id": "245a48e8730cdf4b"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 1230,
+                "y": 260,
+                "wires": [
+                    {
+                        "id": "9b59fe476f516b38",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 950,
+                "y": 120,
+                "wires": [
+                    {
+                        "id": "28c0771b4b0833b9",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [
+            {
+                "name": "grant",
+                "type": "str",
+                "value": "client",
+                "ui": {
+                    "icon": "font-awesome/fa-id-card-o",
+                    "label": {
+                        "en-US": "Grant Type"
+                    },
+                    "type": "select",
+                    "opts": {
+                        "opts": [
+                            {
+                                "l": {
+                                    "en-US": "authorization code"
+                                },
+                                "v": "code"
+                            },
+                            {
+                                "l": {
+                                    "en-US": "client credentials"
+                                },
+                                "v": "client"
+                            },
+                            {
+                                "l": {
+                                    "en-US": "password"
+                                },
+                                "v": "password"
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "name": "scope",
+                "type": "str",
+                "value": "farm_worker",
+                "ui": {
+                    "type": "select",
+                    "opts": {
+                        "opts": [
+                            {
+                                "l": {
+                                    "en-US": "Manager"
+                                },
+                                "v": "farm_manager"
+                            },
+                            {
+                                "l": {
+                                    "en-US": "Viewer"
+                                },
+                                "v": "farm_viewer"
+                            },
+                            {
+                                "l": {
+                                    "en-US": "Worker"
+                                },
+                                "v": "farm_worker"
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "name": "url",
+                "type": "cred"
+            },
+            {
+                "name": "redirect",
+                "type": "cred"
+            },
+            {
+                "name": "client",
+                "type": "cred"
+            },
+            {
+                "name": "secret",
+                "type": "cred"
+            },
+            {
+                "name": "username",
+                "type": "cred"
+            },
+            {
+                "name": "password",
+                "type": "cred"
+            }
+        ],
+        "meta": {},
+        "color": "#C7E9C0",
+        "outputLabels": [
+            "Debug",
+            "Autherization Code URL"
+        ],
+        "icon": "node-red-contrib-oauth2/oauth2.svg"
+    },
+    {
+        "id": "3457d8031de8cd42",
+        "type": "function",
+        "z": "7dc49beefc960324",
+        "name": "authorization_code",
+        "func": "var farmOSurl = env.get('url');\nglobal.set('farmOSurl', farmOSurl);\n\nvar client = env.get('client');\nvar redirect = env.get('redirect');\nvar secret = env.get('secret');\nvar scope = env.get('scope');\n\nmsg.payload ={\n        \"grant_type\": \"authorization_code\",\n            \"client_id\": client,\n            \"code\": msg.payload.code,\n            \"state\": msg.payload.state,\n            \"redirect_uri\": redirect,\n            \"client_secret\": secret,\n            \"scope\": scope\n        }\n\nmsg.headers = {};\nmsg.headers['Accept'] = \"application/json\";\nmsg.headers['content-type'] = 'application/x-www-form-urlencoded';\n\nmsg.method = \"POST\";\nmsg.url = env.get('url') + \"/oauth/token\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 180,
+        "wires": [
+            [
+                "40a71fd2da425e1a"
+            ]
+        ]
+    },
+    {
+        "id": "40a71fd2da425e1a",
+        "type": "http request",
+        "z": "7dc49beefc960324",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "fad14de366c84480",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 650,
+        "y": 260,
+        "wires": [
+            [
+                "0e766f373744777e"
+            ]
+        ]
+    },
+    {
+        "id": "4fad059381b91f7d",
+        "type": "function",
+        "z": "7dc49beefc960324",
+        "name": "client_credentials",
+        "func": "var farmOSurl = env.get('url');\nglobal.set('farmOSurl', farmOSurl);\n\nvar client = env.get('client');\nvar secret = env.get('secret');\nvar scope = env.get('scope');\n\nmsg.payload = {\n    \"grant_type\": \"client_credentials\",\n                \"client_id\": client,\n                \"client_secret\": secret,\n                \"scope\": scope\n}\n\nmsg.headers = {};\nmsg.headers['Accept'] = \"application/json\";\nmsg.headers['content-type'] = 'application/x-www-form-urlencoded';\n\nmsg.method = \"POST\";\nmsg.url = env.get('url') + \"/oauth/token\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 260,
+        "wires": [
+            [
+                "40a71fd2da425e1a"
+            ]
+        ]
+    },
+    {
+        "id": "245a48e8730cdf4b",
+        "type": "switch",
+        "z": "7dc49beefc960324",
+        "name": "",
+        "property": "grant",
+        "propertyType": "env",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "code",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "client",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "password",
+                "vt": "str"
+            }
+        ],
+        "checkall": "false",
+        "repair": true,
+        "outputs": 3,
+        "x": 190,
+        "y": 260,
+        "wires": [
+            [
+                "187dc2e2714c9c4a"
+            ],
+            [
+                "4fad059381b91f7d"
+            ],
+            [
+                "333c7100ca0411e3"
+            ]
+        ]
+    },
+    {
+        "id": "333c7100ca0411e3",
+        "type": "function",
+        "z": "7dc49beefc960324",
+        "name": "password",
+        "func": "var farmOSurl = env.get('url');\nglobal.set('farmOSurl', farmOSurl);\n\nvar client = env.get('client');\nvar scope = env.get('scope');\nvar username = env.get('username');\nvar password = env.get('password');\n\nmsg.payload = {\n    \"grant_type\": \"password\",\n    \"username\": username,\n    \"password\": password,\n    \"client_id\": client,\n    \"scope\": scope\n}\n\nmsg.headers = {};\nmsg.headers['Accept'] = \"application/json\";\nmsg.headers['content-type'] = 'application/x-www-form-urlencoded';\n\nmsg.method = \"POST\";\nmsg.url = env.get('url') + \"/oauth/token\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 320,
+        "wires": [
+            [
+                "40a71fd2da425e1a"
+            ]
+        ]
+    },
+    {
+        "id": "28c0771b4b0833b9",
+        "type": "function",
+        "z": "7dc49beefc960324",
+        "name": "Generate  URL",
+        "func": "msg.payload = env.get(\"url\") + \"/oauth/authorize?response_type=code&client_id=\" + env.get(\"client\") + \"&scope=\" + env.get(\"scope\") + \"&redirect_uri=\" + env.get(\"redirect\") + \"&state=p4W8P5f7gJCIDbC1Mv78zHhlpJOidy\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "187dc2e2714c9c4a",
+        "type": "switch",
+        "z": "7dc49beefc960324",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "url",
+                "vt": "str"
+            },
+            {
+                "t": "hask",
+                "v": "code",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 190,
+        "y": 140,
+        "wires": [
+            [
+                "28c0771b4b0833b9"
+            ],
+            [
+                "3457d8031de8cd42"
+            ]
+        ]
+    },
+    {
+        "id": "0e766f373744777e",
+        "type": "function",
+        "z": "7dc49beefc960324",
+        "name": "Process tokens",
+        "func": "var hours,min,day,month,year;\nvar date = new Date();\nif (msg.payload.access_token) {\n    var token = msg.payload.access_token;\n    var refresh = msg.payload.refresh_token;\n    var expiry = Date.now() + (msg.payload.expires_in * 1000) - 120000;\n    global.set('farmos_token_expiry', expiry);\n    global.set('token', token);\n    global.set('farmos_refresh', refresh);\n    hours = date.getHours();\n    min = date.getMinutes();\n    day = date.getDay() + 1;\n    month = date.getMonth() + 1;\n    year = date.getFullYear();\n    msg.bearer = msg.payload;\n    msg.payload = \"Authenticated \" + hours + \":\" + min + \" \" + day + \"/\" + month + \"/\" + year;\n} else {\n    msg.error = msg.payload;\n    msg.payload = msg.error.error;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 260,
+        "wires": [
+            [
+                "9b59fe476f516b38"
+            ]
+        ]
+    },
+    {
+        "id": "9b59fe476f516b38",
+        "type": "change",
+        "z": "7dc49beefc960324",
+        "name": "",
+        "rules": [
+            {
+                "t": "delete",
+                "p": "url",
+                "pt": "msg"
+            },
+            {
+                "t": "delete",
+                "p": "method",
+                "pt": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1060,
+        "y": 260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fad14de366c84480",
+        "type": "tls-config",
+        "z": "7dc49beefc960324",
+        "name": "",
+        "cert": "",
+        "key": "",
+        "ca": "",
+        "certname": "",
+        "keyname": "",
+        "caname": "",
+        "servername": "",
+        "verifyservercert": false,
+        "alpnprotocol": ""
+    },
+    {
+        "id": "c884171d9a258ae0",
+        "type": "tab",
+        "label": "farmOS",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "ce8f7dbd8e56a369",
+        "type": "group",
+        "z": "c884171d9a258ae0",
+        "style": {
+            "stroke": "#999999",
+            "stroke-opacity": "1",
+            "fill": "none",
+            "fill-opacity": "1",
+            "label": true,
+            "label-position": "nw",
+            "color": "#a4a4a4"
+        },
+        "nodes": [
+            "91b11f039bfd8a23",
+            "ba0078c02a0550c3",
+            "7b360585e4e97755",
+            "cdbaf634471268c2",
+            "5883ff13f8d30b28",
+            "5798b102b5de0b94",
+            "78922e158923c570",
+            "b976fb69270b4e49",
+            "494bd59b7885f425",
+            "22a010c395412820",
+            "228b788455c30cd1",
+            "988940f5317bb144",
+            "ddc79ae6bf276a97",
+            "68200a9b41e4e324",
+            "27ae2f00bd6c915b"
+        ],
+        "x": 1004,
+        "y": 519,
+        "w": 522,
+        "h": 602
+    },
+    {
+        "id": "325ba2848f511254",
+        "type": "group",
+        "z": "c884171d9a258ae0",
+        "style": {
+            "stroke": "#999999",
+            "stroke-opacity": "1",
+            "fill": "none",
+            "fill-opacity": "1",
+            "label": true,
+            "label-position": "nw",
+            "color": "#a4a4a4"
+        },
+        "nodes": [
+            "f8dc4a4b5ab9a3f0",
+            "b7a6a816f5f0f176",
+            "194e455602e6b268",
+            "c0dc7e588a86cc58",
+            "9f1d33e0e36ac883",
+            "438e9a149adf654f",
+            "2bad50e8b8f94a42",
+            "b63d5ea0941c4774",
+            "71ca6bdb6e31dab9",
+            "23a30ff6558fe659",
+            "5dfcd17dc5de88c3",
+            "935602b9f785f544",
+            "fb65c18cd4b6e542",
+            "0ee9f5bf9f4ab924",
+            "2ad00971d2cfb28e",
+            "73d56aa4f7c70410",
+            "2a4efd815e5d4272",
+            "272ae72ee625087a",
+            "077c526aefa38ef9",
+            "f53c8c1fde1848bd",
+            "12fb55ef18803cd5",
+            "3e7eea41ad56aaa1",
+            "854f74b5bb100258",
+            "4046ec37791f3bcb",
+            "639963dc91e504fe",
+            "b7add68b19389e70",
+            "e15570ec50aed753",
+            "1ffa9f6e7b392bb9",
+            "e74a04a6d96c21ec"
+        ],
+        "x": 34,
+        "y": 519,
+        "w": 892,
+        "h": 702
+    },
+    {
+        "id": "c7636ef23a97b475",
+        "type": "group",
+        "z": "c884171d9a258ae0",
+        "style": {
+            "stroke": "#999999",
+            "stroke-opacity": "1",
+            "fill": "none",
+            "fill-opacity": "1",
+            "label": true,
+            "label-position": "nw",
+            "color": "#a4a4a4"
+        },
+        "nodes": [
+            "0b57ae9fc105d565",
+            "c528f46f0434709c",
+            "b527dbe605749e17",
+            "c583a4ed99fa4160",
+            "638c3d5c2a2d259a",
+            "55c7ea5862ab8478",
+            "894129ec95f61d1f",
+            "dd5741a94ca4338f",
+            "761fb0634b314ea2",
+            "cd53986ca5dc0c8e",
+            "4734c882d27d30c9",
+            "603715fa02dac6bb",
+            "2c08c6641c86db80",
+            "ee90ded1dd86b02f",
+            "59bc78a1dc68dfec",
+            "f9862b904e6d8a51",
+            "c725dafbd80be057",
+            "19a19e5409b2e5d8",
+            "c1ac4c4944b846a1",
+            "a7efe282f8f59e02",
+            "22d8e93ff89ed764"
+        ],
+        "x": 864,
+        "y": 59,
+        "w": 882,
+        "h": 322
+    },
+    {
+        "id": "e74a04a6d96c21ec",
+        "type": "junction",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "x": 820,
+        "y": 1180,
+        "wires": [
+            [
+                "194e455602e6b268"
+            ]
+        ]
+    },
+    {
+        "id": "0b57ae9fc105d565",
+        "type": "subflow:7dc49beefc960324",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "",
+        "env": [
+            {
+                "name": "grant",
+                "value": "password",
+                "type": "str"
+            },
+            {
+                "name": "scope",
+                "value": "farm_manager",
+                "type": "str"
+            },
+            {
+                "name": "url",
+                "type": "cred"
+            },
+            {
+                "name": "redirect",
+                "type": "cred"
+            },
+            {
+                "name": "client",
+                "type": "cred"
+            },
+            {
+                "name": "secret",
+                "type": "cred"
+            },
+            {
+                "name": "username",
+                "type": "cred"
+            },
+            {
+                "name": "password",
+                "type": "cred"
+            }
+        ],
+        "x": 1090,
+        "y": 220,
+        "wires": [
+            [
+                "c528f46f0434709c",
+                "55c7ea5862ab8478",
+                "4734c882d27d30c9",
+                "c583a4ed99fa4160",
+                "2c08c6641c86db80",
+                "59bc78a1dc68dfec",
+                "22d8e93ff89ed764"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "c528f46f0434709c",
+        "type": "subflow:949541c9b70110d5",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "Get Inventory ",
+        "env": [
+            {
+                "name": "API",
+                "value": "asset/material",
+                "type": "str"
+            },
+            {
+                "name": "Method",
+                "value": "GET",
+                "type": "str"
+            }
+        ],
+        "x": 1360,
+        "y": 140,
+        "wires": [
+            [
+                "b527dbe605749e17"
+            ]
+        ]
+    },
+    {
+        "id": "b527dbe605749e17",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "Store Inventory",
+        "func": "var options = [];\nvar name; \nvar i = 0; \nif (msg.payload.data.length !=0){\nmsg.payload.data.forEach(data => {\n    name = data.attributes.name\n  options.push({[name]:i}); \n  i++;\n    })\n}\nmsg.options = options;\nflow.set(\"Inventory\", msg.payload.data);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1560,
+        "y": 140,
+        "wires": [
+            [
+                "cd53986ca5dc0c8e"
+            ]
+        ]
+    },
+    {
+        "id": "988940f5317bb144",
+        "type": "ui_button",
+        "z": "c884171d9a258ae0",
+        "g": "ce8f7dbd8e56a369",
+        "name": "",
+        "group": "374b281af3b5b380",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Re-authenticate",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 1180,
+        "y": 700,
+        "wires": [
+            [
+                "ddc79ae6bf276a97"
+            ]
+        ]
+    },
+    {
+        "id": "91b11f039bfd8a23",
+        "type": "ui_dropdown",
+        "z": "c884171d9a258ae0",
+        "g": "ce8f7dbd8e56a369",
+        "name": "",
+        "label": "Inventory",
+        "tooltip": "",
+        "place": "Select option",
+        "group": "374b281af3b5b380",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "multiple": false,
+        "options": [],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 1160,
+        "y": 800,
+        "wires": [
+            [
+                "78922e158923c570"
+            ]
+        ]
+    },
+    {
+        "id": "68200a9b41e4e324",
+        "type": "ui_text",
+        "z": "c884171d9a258ae0",
+        "g": "ce8f7dbd8e56a369",
+        "group": "374b281af3b5b380",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 1150,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "ba0078c02a0550c3",
+        "type": "ui_media",
+        "z": "c884171d9a258ae0",
+        "g": "ce8f7dbd8e56a369",
+        "group": "374b281af3b5b380",
+        "name": "",
+        "width": "6",
+        "height": "4",
+        "order": 3,
+        "category": "Equipment",
+        "file": "35398445935_ce18646381_c.jpg",
+        "layout": "adjust",
+        "showcontrols": true,
+        "loop": true,
+        "onstart": false,
+        "scope": "local",
+        "tooltip": "",
+        "x": 1150,
+        "y": 740,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7b360585e4e97755",
+        "type": "ui_numeric",
+        "z": "c884171d9a258ae0",
+        "g": "ce8f7dbd8e56a369",
+        "name": "",
+        "label": "Bale Count",
+        "tooltip": "",
+        "group": "374b281af3b5b380",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "wrap": false,
+        "passthru": true,
+        "topic": "topic",
+        "topicType": "msg",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "200",
+        "step": 1,
+        "className": "",
+        "x": 1170,
+        "y": 1000,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "cdbaf634471268c2",
+        "type": "ui_button",
+        "z": "c884171d9a258ae0",
+        "g": "ce8f7dbd8e56a369",
+        "name": "",
+        "group": "374b281af3b5b380",
+        "order": 7,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Save Harvest",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "green",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 1180,
+        "y": 920,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5883ff13f8d30b28",
+        "type": "ui_button",
+        "z": "c884171d9a258ae0",
+        "g": "ce8f7dbd8e56a369",
+        "name": "",
+        "group": "374b281af3b5b380",
+        "order": 8,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Reset Counter",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "red",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 1180,
+        "y": 1080,
+        "wires": [
+            [
+                "5798b102b5de0b94"
+            ]
+        ]
+    },
+    {
+        "id": "5798b102b5de0b94",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "g": "ce8f7dbd8e56a369",
+        "name": "Reset",
+        "func": "msg.payload = 0;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1150,
+        "y": 1040,
+        "wires": [
+            [
+                "7b360585e4e97755"
+            ]
+        ]
+    },
+    {
+        "id": "c583a4ed99fa4160",
+        "type": "sf:949541c9b70110d5",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "Get Unit Terms",
+        "API": "taxonomy_term/unit",
+        "Method": "GET",
+        "x": 1360,
+        "y": 100,
+        "wires": [
+            [
+                "638c3d5c2a2d259a"
+            ]
+        ]
+    },
+    {
+        "id": "638c3d5c2a2d259a",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "Store Unit terms",
+        "func": "var array = [];\nvar name;\nvar id;\n\nmsg.payload.data.forEach(data => {\nname = data.attributes.name;\nid = data.id;\narray.push({id:id,name:name});\n})\n\nflow.set(\"unit_terms\", array);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1560,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "55c7ea5862ab8478",
+        "type": "sf:949541c9b70110d5",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "Get Land",
+        "API": "asset/land",
+        "Method": "GET",
+        "x": 1340,
+        "y": 180,
+        "wires": [
+            [
+                "894129ec95f61d1f"
+            ]
+        ]
+    },
+    {
+        "id": "78922e158923c570",
+        "type": "debug",
+        "z": "c884171d9a258ae0",
+        "g": "ce8f7dbd8e56a369",
+        "name": "debug 6",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1420,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "b976fb69270b4e49",
+        "type": "ui_dropdown",
+        "z": "c884171d9a258ae0",
+        "g": "ce8f7dbd8e56a369",
+        "name": "",
+        "label": "Select Land",
+        "tooltip": "",
+        "place": "Select option",
+        "group": "374b281af3b5b380",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "multiple": false,
+        "options": [
+            {
+                "label": "",
+                "value": "",
+                "type": "str"
+            }
+        ],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 1170,
+        "y": 860,
+        "wires": [
+            [
+                "78922e158923c570"
+            ]
+        ]
+    },
+    {
+        "id": "894129ec95f61d1f",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "Store Locations",
+        "func": "var options = [];\nvar name;\nvar i = 0;\nif (msg.payload.data.length != 0) {\n    msg.payload.data.forEach(data => {\n        name = data.attributes.name\n        options.push({ [name]: i });\n        i++;\n    })\n}\nmsg.options = options;\nflow.set(\"Land\", msg.payload.data);\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1560,
+        "y": 180,
+        "wires": [
+            [
+                "761fb0634b314ea2"
+            ]
+        ]
+    },
+    {
+        "id": "5187dbf246595212",
+        "type": "ui_button",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "group": "16a1cba9bcc30ca6",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Re-Authenticate",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 2160,
+        "y": 560,
+        "wires": [
+            [
+                "ad72bc0b1898970f"
+            ]
+        ]
+    },
+    {
+        "id": "199ebc929ab6a0f9",
+        "type": "ui_text",
+        "z": "c884171d9a258ae0",
+        "group": "16a1cba9bcc30ca6",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 2130,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "dd5741a94ca4338f",
+        "type": "comment",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "Sync",
+        "info": "",
+        "x": 950,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "494bd59b7885f425",
+        "type": "comment",
+        "z": "c884171d9a258ae0",
+        "g": "ce8f7dbd8e56a369",
+        "name": "Baler",
+        "info": "",
+        "x": 1150,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "22a010c395412820",
+        "type": "link in",
+        "z": "c884171d9a258ae0",
+        "g": "ce8f7dbd8e56a369",
+        "name": "link in 2",
+        "links": [
+            "c7691849bb475457"
+        ],
+        "x": 1055,
+        "y": 800,
+        "wires": [
+            [
+                "91b11f039bfd8a23"
+            ]
+        ]
+    },
+    {
+        "id": "228b788455c30cd1",
+        "type": "link in",
+        "z": "c884171d9a258ae0",
+        "g": "ce8f7dbd8e56a369",
+        "name": "link in 3",
+        "links": [
+            "761fb0634b314ea2"
+        ],
+        "x": 1055,
+        "y": 860,
+        "wires": [
+            [
+                "b976fb69270b4e49"
+            ]
+        ]
+    },
+    {
+        "id": "761fb0634b314ea2",
+        "type": "link out",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "link out 2",
+        "mode": "link",
+        "links": [
+            "228b788455c30cd1",
+            "db4d300509a94b7d"
+        ],
+        "x": 1705,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "cd53986ca5dc0c8e",
+        "type": "link out",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "link out 3",
+        "mode": "link",
+        "links": [
+            "4046ec37791f3bcb"
+        ],
+        "x": 1705,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "4734c882d27d30c9",
+        "type": "sf:949541c9b70110d5",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "Get Log Types",
+        "API": "log_type/log_type",
+        "Method": "GET",
+        "x": 1360,
+        "y": 220,
+        "wires": [
+            [
+                "603715fa02dac6bb"
+            ]
+        ]
+    },
+    {
+        "id": "603715fa02dac6bb",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "Store Log Types",
+        "func": "var options = [];\nvar name;\nvar i = 0;\nif (msg.payload.links.length != 0) {\n    msg.payload.data.forEach(data => {\n        name = data.attributes.label\n        options.push({ [name]: i });\n        i++;\n    })\n    }\nmsg.options = options;\nflow.set(\"Logs\", msg.payload.data);\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1560,
+        "y": 220,
+        "wires": [
+            [
+                "c725dafbd80be057"
+            ]
+        ]
+    },
+    {
+        "id": "e3c44549a8556644",
+        "type": "ui_text_input",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "label": "Log Name:",
+        "tooltip": "",
+        "group": "27cfc9a84576dc3e",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "mode": "text",
+        "delay": "500",
+        "topic": "topic",
+        "sendOnBlur": true,
+        "className": "",
+        "topicType": "msg",
+        "x": 2150,
+        "y": 900,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "41197f6324ca8fb7",
+        "type": "ui_dropdown",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "label": "Location:",
+        "tooltip": "",
+        "place": "Select option",
+        "group": "27cfc9a84576dc3e",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "multiple": false,
+        "options": [
+            {
+                "label": "",
+                "value": "",
+                "type": "str"
+            }
+        ],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 2140,
+        "y": 940,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "92a632b3b7dc66b1",
+        "type": "ui_dropdown",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "label": "Asset Type:",
+        "tooltip": "",
+        "place": "Select option",
+        "group": "16a1cba9bcc30ca6",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "multiple": false,
+        "options": [
+            {
+                "label": "",
+                "value": "",
+                "type": "str"
+            }
+        ],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 2150,
+        "y": 720,
+        "wires": [
+            [
+                "04f91f88fd30281b"
+            ]
+        ]
+    },
+    {
+        "id": "7b4ff57604f1609c",
+        "type": "debug",
+        "z": "c884171d9a258ae0",
+        "name": "debug 14",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2580,
+        "y": 1060,
+        "wires": []
+    },
+    {
+        "id": "2bfedaa972b52448",
+        "type": "ui_template",
+        "z": "c884171d9a258ae0",
+        "group": "27cfc9a84576dc3e",
+        "name": "",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "format": "<label for=\"text\">Add Notes:</label>\n<textarea id=\"textentered\" rows=\"8\" cols=\"25\"></textarea>\n<input type=\"submit\" value=\"Create Log\" ng-click=\"send({payload:notes()})\">\n\n<script>\n    (function(scope) {\n\n    scope.notes = function() {\n        var text = document.getElementById(\"textentered\").value;\n        return text;\n    }\n\n})(scope)\n\n</script>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 2140,
+        "y": 1100,
+        "wires": [
+            [
+                "57c46b83f500a4e6"
+            ]
+        ]
+    },
+    {
+        "id": "f5d2d177be27440c",
+        "type": "ui_dropdown",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "label": "Status:",
+        "tooltip": "",
+        "place": "Select option",
+        "group": "27cfc9a84576dc3e",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "multiple": false,
+        "options": [
+            {
+                "label": "Pending",
+                "value": "0",
+                "type": "str"
+            },
+            {
+                "label": "Done",
+                "value": "1",
+                "type": "str"
+            }
+        ],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 2140,
+        "y": 1020,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "446ae1616b72874b",
+        "type": "ui_dropdown",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "label": "Flag:",
+        "tooltip": "",
+        "place": "Select option",
+        "group": "27cfc9a84576dc3e",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "multiple": false,
+        "options": [
+            {
+                "label": "",
+                "value": "",
+                "type": "str"
+            }
+        ],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 2130,
+        "y": 980,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2c08c6641c86db80",
+        "type": "sf:949541c9b70110d5",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "GetAssetTypes",
+        "API": "asset_type/asset_type",
+        "Method": "GET",
+        "x": 1360,
+        "y": 260,
+        "wires": [
+            [
+                "ee90ded1dd86b02f"
+            ]
+        ]
+    },
+    {
+        "id": "ee90ded1dd86b02f",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "Store Asset Types",
+        "func": "var options = [];\nvar name;\nvar i = 0;\nif (msg.payload.links.length != 0) {\n    msg.payload.data.forEach(data => {\n        name = data.attributes.label\n        options.push({ [name]: i });\n        i++;\n    })\n    }\nmsg.options = options;\nflow.set(\"Assets\", msg.payload.data);\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1570,
+        "y": 260,
+        "wires": [
+            [
+                "19a19e5409b2e5d8"
+            ]
+        ]
+    },
+    {
+        "id": "59bc78a1dc68dfec",
+        "type": "sf:949541c9b70110d5",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "Get Flag Types",
+        "API": "flag/flag",
+        "Method": "GET",
+        "x": 1360,
+        "y": 300,
+        "wires": [
+            [
+                "f9862b904e6d8a51"
+            ]
+        ]
+    },
+    {
+        "id": "f9862b904e6d8a51",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "Store Flag Types",
+        "func": "var options = [];\nvar name;\nvar i = 0;\nif (msg.payload.links.length != 0) {\n    msg.payload.data.forEach(data => {\n        name = data.attributes.label\n        options.push({ [name]: i });\n        i++;\n    })\n    }\nmsg.options = options;\nflow.set(\"Flags\", msg.payload.data);\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1570,
+        "y": 300,
+        "wires": [
+            [
+                "c1ac4c4944b846a1"
+            ]
+        ]
+    },
+    {
+        "id": "0eed3c1cb1fde944",
+        "type": "ui_date_picker",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "label": "Date:",
+        "group": "16a1cba9bcc30ca6",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "topic": "payload",
+        "topicType": "msg",
+        "className": "",
+        "x": 2130,
+        "y": 640,
+        "wires": [
+            [
+                "96ec8e50eefab0d1"
+            ]
+        ]
+    },
+    {
+        "id": "3ce26bd5af4b7fcb",
+        "type": "ui_dropdown",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "label": "Log Type:",
+        "tooltip": "",
+        "place": "Select option",
+        "group": "16a1cba9bcc30ca6",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "multiple": false,
+        "options": [
+            {
+                "label": "",
+                "value": "",
+                "type": "str"
+            }
+        ],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 2140,
+        "y": 680,
+        "wires": [
+            [
+                "fb8ad752d9a72b89"
+            ]
+        ]
+    },
+    {
+        "id": "db4d300509a94b7d",
+        "type": "link in",
+        "z": "c884171d9a258ae0",
+        "name": "link in 5",
+        "links": [
+            "761fb0634b314ea2"
+        ],
+        "x": 2025,
+        "y": 940,
+        "wires": [
+            [
+                "41197f6324ca8fb7"
+            ]
+        ]
+    },
+    {
+        "id": "c725dafbd80be057",
+        "type": "link out",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "link out 4",
+        "mode": "link",
+        "links": [
+            "f72c858723c6c133"
+        ],
+        "x": 1705,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "f72c858723c6c133",
+        "type": "link in",
+        "z": "c884171d9a258ae0",
+        "name": "link in 6",
+        "links": [
+            "c725dafbd80be057"
+        ],
+        "x": 2025,
+        "y": 680,
+        "wires": [
+            [
+                "3ce26bd5af4b7fcb"
+            ]
+        ]
+    },
+    {
+        "id": "19a19e5409b2e5d8",
+        "type": "link out",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "link out 5",
+        "mode": "link",
+        "links": [
+            "e950e513c3875381"
+        ],
+        "x": 1705,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "e950e513c3875381",
+        "type": "link in",
+        "z": "c884171d9a258ae0",
+        "name": "link in 7",
+        "links": [
+            "19a19e5409b2e5d8"
+        ],
+        "x": 2025,
+        "y": 720,
+        "wires": [
+            [
+                "92a632b3b7dc66b1"
+            ]
+        ]
+    },
+    {
+        "id": "ac092d018b68f2bd",
+        "type": "link in",
+        "z": "c884171d9a258ae0",
+        "name": "link in 8",
+        "links": [
+            "c1ac4c4944b846a1"
+        ],
+        "x": 2025,
+        "y": 980,
+        "wires": [
+            [
+                "446ae1616b72874b"
+            ]
+        ]
+    },
+    {
+        "id": "c1ac4c4944b846a1",
+        "type": "link out",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "link out 6",
+        "mode": "link",
+        "links": [
+            "33ba0d5ea747f756",
+            "ac092d018b68f2bd"
+        ],
+        "x": 1705,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "91f09e4f7d13cca7",
+        "type": "inject",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1970,
+        "y": 640,
+        "wires": [
+            [
+                "0eed3c1cb1fde944"
+            ]
+        ]
+    },
+    {
+        "id": "a7efe282f8f59e02",
+        "type": "link in",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "link in 9",
+        "links": [
+            "b7add68b19389e70",
+            "ddc79ae6bf276a97",
+            "ad72bc0b1898970f"
+        ],
+        "x": 905,
+        "y": 220,
+        "wires": [
+            [
+                "0b57ae9fc105d565"
+            ]
+        ]
+    },
+    {
+        "id": "22d8e93ff89ed764",
+        "type": "link out",
+        "z": "c884171d9a258ae0",
+        "g": "c7636ef23a97b475",
+        "name": "link out 7",
+        "mode": "link",
+        "links": [
+            "1ffa9f6e7b392bb9",
+            "27ae2f00bd6c915b",
+            "565939b99daad2c7"
+        ],
+        "x": 1295,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "f8dc4a4b5ab9a3f0",
+        "type": "ui_media",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "group": "183676a5e0bec106",
+        "name": "",
+        "width": "6",
+        "height": "5",
+        "order": 3,
+        "category": "Bales",
+        "file": "istockphoto-1164916650-612x612.jpg",
+        "layout": "adjust",
+        "showcontrols": true,
+        "loop": true,
+        "onstart": false,
+        "scope": "local",
+        "tooltip": "",
+        "x": 670,
+        "y": 940,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b7a6a816f5f0f176",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "Select Inventory",
+        "func": "var token = global.get('token');\nvar i = msg.payload;\nvar inventory = flow.get(\"Inventory\");\n\nif (inventory[i].attributes.inventory.length !=0) {\n    msg.payload = inventory[i].attributes.inventory[0].value;\n    flow.set(\"current_inventory\", inventory[i].attributes.inventory[0].value);\n}\nelse {\n    msg.payload = 0\n    }\n\nmsg.url = inventory[i].relationships.image.links.related.href;\n\nmsg.headers = {};\nmsg.headers['Authorization'] = \"Bearer \" + token;\nmsg.headers['Accept'] = \"application/vnd.api+json\";\nmsg.headers['content-type'] = 'application/vnd.api+json';\n\nmsg.selected = inventory[i]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 680,
+        "wires": [
+            [
+                "194e455602e6b268",
+                "935602b9f785f544",
+                "c0dc7e588a86cc58"
+            ]
+        ]
+    },
+    {
+        "id": "194e455602e6b268",
+        "type": "ui_text",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "group": "183676a5e0bec106",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Current Stock",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 820,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "c0dc7e588a86cc58",
+        "type": "http request",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 190,
+        "y": 940,
+        "wires": [
+            [
+                "b63d5ea0941c4774"
+            ]
+        ]
+    },
+    {
+        "id": "9f1d33e0e36ac883",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "Get Image",
+        "func": "var image = msg.payload.data[0].attributes.uri.url;\nmsg.src = global.get(\"farmOSurl\") + image;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 510,
+        "y": 960,
+        "wires": [
+            [
+                "f8dc4a4b5ab9a3f0"
+            ]
+        ]
+    },
+    {
+        "id": "438e9a149adf654f",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "Reset",
+        "func": "msg.payload = \"Select Inventory\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 800,
+        "wires": [
+            [
+                "194e455602e6b268"
+            ]
+        ]
+    },
+    {
+        "id": "2bad50e8b8f94a42",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "Reset Image",
+        "func": "msg.payload = {\n    category: \"Bales\",\n    name: \"istockphoto-1164916650-612x612.jpg\"\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 510,
+        "y": 920,
+        "wires": [
+            [
+                "f8dc4a4b5ab9a3f0"
+            ]
+        ]
+    },
+    {
+        "id": "b63d5ea0941c4774",
+        "type": "switch",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "",
+        "property": "msg.payload.data[0].attributes",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "hask",
+                "v": "uri",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 350,
+        "y": 940,
+        "wires": [
+            [
+                "9f1d33e0e36ac883"
+            ],
+            [
+                "2bad50e8b8f94a42"
+            ]
+        ]
+    },
+    {
+        "id": "71ca6bdb6e31dab9",
+        "type": "ui_numeric",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "",
+        "label": "Amount to Use",
+        "tooltip": "",
+        "group": "183676a5e0bec106",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "wrap": false,
+        "passthru": false,
+        "topic": "topic",
+        "topicType": "msg",
+        "format": "{{value}}",
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "className": "",
+        "x": 460,
+        "y": 640,
+        "wires": [
+            [
+                "fb65c18cd4b6e542"
+            ]
+        ]
+    },
+    {
+        "id": "23a30ff6558fe659",
+        "type": "ui_button",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "",
+        "group": "183676a5e0bec106",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Use From Stock",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 140,
+        "y": 1040,
+        "wires": [
+            [
+                "0ee9f5bf9f4ab924"
+            ]
+        ]
+    },
+    {
+        "id": "5dfcd17dc5de88c3",
+        "type": "ui_dropdown",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "",
+        "label": "Inventory",
+        "tooltip": "",
+        "place": "Select option",
+        "group": "183676a5e0bec106",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "multiple": false,
+        "options": [],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 240,
+        "y": 680,
+        "wires": [
+            [
+                "b7a6a816f5f0f176"
+            ]
+        ]
+    },
+    {
+        "id": "935602b9f785f544",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "Select Quantity",
+        "func": "if (msg.selected.attributes.inventory.length != 0) {\nvar unit = msg.selected.attributes.inventory[0].units\nvar unit_terms = flow.get(\"unit_terms\");\nvar unit_id = null;\nvar asset_id = msg.selected.id\n\n//Search for unit term uuid\nunit_terms.forEach(data => {\n    if (data.name == unit) {\n        unit_id = data.id;\n    }\n})\n\nflow.set(\"unit_id\" , unit_id);\n}\nflow.set(\"asset_id\", asset_id);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 680,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fb65c18cd4b6e542",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "Select Amount",
+        "func": "flow.set(\"amount\", msg.payload)\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 640,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0ee9f5bf9f4ab924",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "Quantity json",
+        "func": "var unit_id = flow.get(\"unit_id\");\nvar numerator = flow.get(\"amount\");\nvar asset_id = flow.get(\"asset_id\");\n\n\nif (unit_id != null && numerator != 0) {\n    //Create Asset Object \n    msg.payload = {\n        \"data\": {\n            \"type\": \"quantity--material\",\n            \"attributes\": {\n                \"measure\": \"count\",\n                \"value\": {\n                    \"numerator\": numerator,\n                    \"denominator\": 1\n                },\n                \"inventory_adjustment\": \"decrement\"\n            },\n            \"relationships\": {\n                \"inventory_asset\": {\n                    \"data\": {\n                        \"type\": \"asset--material\",\n                        \"id\": asset_id,\n                    }\n                },\n                \"units\": {\n                    \"data\": {\n                        \"type\": \"taxonomy_term--unit\",\n                        \"id\": unit_id\n                    }\n                }\n            }\n        }\n\n    }\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 1040,
+        "wires": [
+            [
+                "2a4efd815e5d4272"
+            ]
+        ]
+    },
+    {
+        "id": "2ad00971d2cfb28e",
+        "type": "sf:949541c9b70110d5",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "Post Quantity",
+        "API": "quantity/material",
+        "Method": "POST",
+        "x": 660,
+        "y": 1040,
+        "wires": [
+            [
+                "12fb55ef18803cd5"
+            ]
+        ]
+    },
+    {
+        "id": "73d56aa4f7c70410",
+        "type": "inject",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "0",
+        "payloadType": "str",
+        "x": 310,
+        "y": 640,
+        "wires": [
+            [
+                "71ca6bdb6e31dab9"
+            ]
+        ]
+    },
+    {
+        "id": "2a4efd815e5d4272",
+        "type": "switch",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "hask",
+                "v": "data",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 490,
+        "y": 1040,
+        "wires": [
+            [
+                "2ad00971d2cfb28e"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "272ae72ee625087a",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "log json",
+        "func": "var asset_id = flow.get(\"asset_id\");\nvar material_id = msg.payload.data.id;\nvar amount = flow.get(\"amount\");\nvar unit_terms = flow.get(\"unit_terms\");\nvar unit_id = msg.payload.data.relationships.units.data.id;\nvar units;\n\n//Search for unit term uuid\nunit_terms.forEach(data => {\n    if (data.id == unit_id) {\n        units = data.name;\n    }\n})\n\n\n\nmsg.payload = {\n    \"data\": {\n        \"type\": \"log--activity\",\n        \"attributes\": {\n            \"name\": \"Used \" + amount + \" \" + units,\n            \"status\": \"done\"\n        },\n        \"relationships\": {\n            \"asset\": {\n                \"data\": [\n                    {\n                        \"type\": \"asset--material\",\n                        \"id\": asset_id\n                    }\n                ]\n            },\n            \"quantity\": {\n                \"data\": [\n                    {\n                        \"type\": \"quantity--standard\",\n                        \"id\": material_id\n                    }\n\n                ]\n            }\n        }\n    }\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 1120,
+        "wires": [
+            [
+                "f53c8c1fde1848bd"
+            ]
+        ]
+    },
+    {
+        "id": "077c526aefa38ef9",
+        "type": "sf:949541c9b70110d5",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "Post log",
+        "API": "log/activity",
+        "Method": "POST",
+        "x": 620,
+        "y": 1120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f53c8c1fde1848bd",
+        "type": "switch",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "hask",
+                "v": "data",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 470,
+        "y": 1120,
+        "wires": [
+            [
+                "077c526aefa38ef9"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "12fb55ef18803cd5",
+        "type": "switch",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "hask",
+                "v": "data",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 150,
+        "y": 1120,
+        "wires": [
+            [
+                "272ae72ee625087a",
+                "3e7eea41ad56aaa1"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "3e7eea41ad56aaa1",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "Update stock",
+        "func": "var numerator = msg.payload.data.attributes.value.numerator;\nvar current_inventory = flow.get(\"current_inventory\");\nmsg.payload = current_inventory - numerator;\nflow.set(\"current_inventory\", current_inventory - numerator );\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 1180,
+        "wires": [
+            [
+                "e74a04a6d96c21ec"
+            ]
+        ]
+    },
+    {
+        "id": "854f74b5bb100258",
+        "type": "comment",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "Use From Invetory",
+        "info": "",
+        "x": 210,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "4046ec37791f3bcb",
+        "type": "link in",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "link in 4",
+        "links": [
+            "cd53986ca5dc0c8e"
+        ],
+        "x": 125,
+        "y": 680,
+        "wires": [
+            [
+                "5dfcd17dc5de88c3"
+            ]
+        ]
+    },
+    {
+        "id": "639963dc91e504fe",
+        "type": "ui_button",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "",
+        "group": "183676a5e0bec106",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Re-authenticate",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 460,
+        "y": 800,
+        "wires": [
+            [
+                "438e9a149adf654f",
+                "2bad50e8b8f94a42",
+                "b7add68b19389e70"
+            ]
+        ]
+    },
+    {
+        "id": "b7add68b19389e70",
+        "type": "link out",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "Reset out",
+        "mode": "link",
+        "links": [
+            "53c4432220db7e83",
+            "a7efe282f8f59e02"
+        ],
+        "x": 595,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "e15570ec50aed753",
+        "type": "ui_text",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "group": "183676a5e0bec106",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 690,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "1ffa9f6e7b392bb9",
+        "type": "link in",
+        "z": "c884171d9a258ae0",
+        "g": "325ba2848f511254",
+        "name": "link in 10",
+        "links": [
+            "22d8e93ff89ed764"
+        ],
+        "x": 575,
+        "y": 580,
+        "wires": [
+            [
+                "e15570ec50aed753"
+            ]
+        ]
+    },
+    {
+        "id": "ddc79ae6bf276a97",
+        "type": "link out",
+        "z": "c884171d9a258ae0",
+        "g": "ce8f7dbd8e56a369",
+        "name": "link out 8",
+        "mode": "link",
+        "links": [
+            "a7efe282f8f59e02"
+        ],
+        "x": 1335,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "27ae2f00bd6c915b",
+        "type": "link in",
+        "z": "c884171d9a258ae0",
+        "g": "ce8f7dbd8e56a369",
+        "name": "link in 11",
+        "links": [
+            "22d8e93ff89ed764"
+        ],
+        "x": 1045,
+        "y": 660,
+        "wires": [
+            [
+                "68200a9b41e4e324"
+            ]
+        ]
+    },
+    {
+        "id": "ad72bc0b1898970f",
+        "type": "link out",
+        "z": "c884171d9a258ae0",
+        "name": "link out 9",
+        "mode": "link",
+        "links": [
+            "a7efe282f8f59e02"
+        ],
+        "x": 2285,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "565939b99daad2c7",
+        "type": "link in",
+        "z": "c884171d9a258ae0",
+        "name": "link in 12",
+        "links": [
+            "22d8e93ff89ed764"
+        ],
+        "x": 2025,
+        "y": 600,
+        "wires": [
+            [
+                "199ebc929ab6a0f9"
+            ]
+        ]
+    },
+    {
+        "id": "a4e858859f7d317b",
+        "type": "comment",
+        "z": "c884171d9a258ae0",
+        "name": "Quick Log",
+        "info": "",
+        "x": 1820,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "3dae4129febf0447",
+        "type": "ui_ui_control",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "events": "change",
+        "x": 2320,
+        "y": 760,
+        "wires": [
+            [
+                "b3ae1728ecf7964c"
+            ]
+        ]
+    },
+    {
+        "id": "5b613a45339722ea",
+        "type": "ui_button",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "group": "16a1cba9bcc30ca6",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "New Log",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "New Log",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 2140,
+        "y": 760,
+        "wires": [
+            [
+                "3dae4129febf0447"
+            ]
+        ]
+    },
+    {
+        "id": "ac0280eaac2e3309",
+        "type": "ui_dropdown",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "label": "Select Assets:",
+        "tooltip": "",
+        "place": "Select option",
+        "group": "27cfc9a84576dc3e",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "multiple": true,
+        "options": [
+            {
+                "label": "",
+                "value": "",
+                "type": "str"
+            }
+        ],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 2160,
+        "y": 860,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "04f91f88fd30281b",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Store Asset Type",
+        "func": "var i = msg.payload;\nvar assets = flow.get(\"Assets\");\nvar QL_AssetType = \"asset--\" + assets[i].attributes.drupal_internal__id;\nflow.set(\"QL_AssetType\", QL_AssetType);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2350,
+        "y": 720,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fb8ad752d9a72b89",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Store Log Type",
+        "func": "var i = msg.payload;\nvar logs = flow.get(\"Logs\");\nvar QL_LogType = logs[i].attributes.drupal_internal__id;\nflow.set(\"QL_LogType\", QL_LogType);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2340,
+        "y": 680,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "96ec8e50eefab0d1",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Store Date",
+        "func": "flow.set(\"QL_Timestamp\", msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2330,
+        "y": 640,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b3ae1728ecf7964c",
+        "type": "subflow:124025c69c7edc12",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "env": [
+            {
+                "name": "Source",
+                "value": "flow",
+                "type": "str"
+            },
+            {
+                "name": "API",
+                "value": "QL_AssetType",
+                "type": "str"
+            },
+            {
+                "name": "filter_source",
+                "value": "enter",
+                "type": "str"
+            },
+            {
+                "name": "Filter",
+                "value": "filter[status]=active",
+                "type": "str"
+            }
+        ],
+        "x": 1790,
+        "y": 860,
+        "wires": [
+            [
+                "fe58cb409ca68f66",
+                "c3289f8019d486b1"
+            ]
+        ]
+    },
+    {
+        "id": "fe58cb409ca68f66",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Select Assets",
+        "func": "var options = [];\nvar name;\nvar i = 0;\nif (msg.payload.data.length != 0) {\n    msg.payload.data.forEach(data => {\n        name = data.attributes.name\n        options.push({ [name]: i });\n        i++;\n    })\n}\nmsg.options = options;\n//flow.set(\"Land\", msg.payload.data);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1980,
+        "y": 860,
+        "wires": [
+            [
+                "ac0280eaac2e3309"
+            ]
+        ]
+    },
+    {
+        "id": "c3289f8019d486b1",
+        "type": "debug",
+        "z": "c884171d9a258ae0",
+        "name": "debug 15",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1840,
+        "y": 960,
+        "wires": []
+    },
+    {
+        "id": "57c46b83f500a4e6",
+        "type": "change",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "Quick Log",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 2600,
+        "y": 1100,
+        "wires": [
+            [
+                "7b4ff57604f1609c",
+                "b9ca16730644f545"
+            ]
+        ]
+    },
+    {
+        "id": "b9ca16730644f545",
+        "type": "ui_ui_control",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "events": "change",
+        "x": 2580,
+        "y": 1140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "374b281af3b5b380",
+        "type": "ui_group",
+        "name": "Baler",
+        "tab": "41cf5817ef28283e",
+        "order": 1,
+        "disp": false,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "16a1cba9bcc30ca6",
+        "type": "ui_group",
+        "name": "Quick Log",
+        "tab": "74fd9882069665c7",
+        "order": 1,
+        "disp": false,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "27cfc9a84576dc3e",
+        "type": "ui_group",
+        "name": "New Log",
+        "tab": "48055b30098c5265",
+        "order": 1,
+        "disp": false,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "183676a5e0bec106",
+        "type": "ui_group",
+        "name": "Inventory",
+        "tab": "9f097e866a06dd9a",
+        "order": 3,
+        "disp": false,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "41cf5817ef28283e",
+        "type": "ui_tab",
+        "name": "Baler Counter",
+        "icon": "fa-leaf",
+        "order": 2,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "74fd9882069665c7",
+        "type": "ui_tab",
+        "name": "Quick Log",
+        "icon": "fa-leaf",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "48055b30098c5265",
+        "type": "ui_tab",
+        "name": "New Log",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": true
+    },
+    {
+        "id": "9f097e866a06dd9a",
+        "type": "ui_tab",
+        "name": "Inventory",
+        "icon": "fa-leaf",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    }
+]

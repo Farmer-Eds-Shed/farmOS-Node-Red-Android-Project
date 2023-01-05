@@ -1557,7 +1557,7 @@
         "z": "c884171d9a258ae0",
         "g": "c7636ef23a97b475",
         "name": "Store Locations",
-        "func": "var options = [];\nvar name;\nvar i = 0;\nif (msg.payload.data.length != 0) {\n    msg.payload.data.forEach(data => {\n        name = data.attributes.name\n        options.push({ [name]: i });\n        i++;\n    })\n}\nmsg.options = options;\nflow.set(\"Land\", msg.payload.data);\nreturn msg;\n",
+        "func": "var options = [];\nvar name;\nvar id;\nif (msg.payload.data.length != 0) {\n    msg.payload.data.forEach(data => {\n        name = data.attributes.name;\n        id = data.id;\n        options.push({ [name]: id });\n    })\n}\nmsg.options = options;\nflow.set(\"Land\", msg.payload.data);\nreturn msg;\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1748,17 +1748,19 @@
         "order": 1,
         "width": 0,
         "height": 0,
-        "passthru": true,
+        "passthru": false,
         "mode": "text",
-        "delay": "500",
+        "delay": "300",
         "topic": "topic",
         "sendOnBlur": true,
         "className": "",
         "topicType": "msg",
         "x": 2150,
-        "y": 900,
+        "y": 920,
         "wires": [
-            []
+            [
+                "d19d35cd9e0787b8"
+            ]
         ]
     },
     {
@@ -1773,8 +1775,8 @@
         "order": 3,
         "width": 0,
         "height": 0,
-        "passthru": true,
-        "multiple": false,
+        "passthru": false,
+        "multiple": true,
         "options": [
             {
                 "label": "",
@@ -1787,9 +1789,11 @@
         "topicType": "msg",
         "className": "",
         "x": 2140,
-        "y": 940,
+        "y": 960,
         "wires": [
-            []
+            [
+                "5f5166f6e6537a46"
+            ]
         ]
     },
     {
@@ -1830,15 +1834,15 @@
         "type": "debug",
         "z": "c884171d9a258ae0",
         "name": "debug 14",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 2580,
-        "y": 1060,
+        "x": 2520,
+        "y": 1080,
         "wires": []
     },
     {
@@ -1857,10 +1861,10 @@
         "templateScope": "local",
         "className": "",
         "x": 2140,
-        "y": 1100,
+        "y": 1120,
         "wires": [
             [
-                "57c46b83f500a4e6"
+                "e6e80178899976a0"
             ]
         ]
     },
@@ -1876,17 +1880,17 @@
         "order": 4,
         "width": 0,
         "height": 0,
-        "passthru": true,
+        "passthru": false,
         "multiple": false,
         "options": [
             {
                 "label": "Pending",
-                "value": "0",
+                "value": "pending",
                 "type": "str"
             },
             {
                 "label": "Done",
-                "value": "1",
+                "value": "done",
                 "type": "str"
             }
         ],
@@ -1895,9 +1899,11 @@
         "topicType": "msg",
         "className": "",
         "x": 2140,
-        "y": 1020,
+        "y": 1040,
         "wires": [
-            []
+            [
+                "9d18ac4ca57f6303"
+            ]
         ]
     },
     {
@@ -1912,8 +1918,8 @@
         "order": 5,
         "width": 0,
         "height": 0,
-        "passthru": true,
-        "multiple": false,
+        "passthru": false,
+        "multiple": true,
         "options": [
             {
                 "label": "",
@@ -1926,9 +1932,11 @@
         "topicType": "msg",
         "className": "",
         "x": 2130,
-        "y": 980,
+        "y": 1000,
         "wires": [
-            []
+            [
+                "e8cc39d203bf227a"
+            ]
         ]
     },
     {
@@ -1953,7 +1961,7 @@
         "z": "c884171d9a258ae0",
         "g": "c7636ef23a97b475",
         "name": "Store Asset Types",
-        "func": "var options = [];\nvar name;\nvar i = 0;\nif (msg.payload.links.length != 0) {\n    msg.payload.data.forEach(data => {\n        name = data.attributes.label\n        options.push({ [name]: i });\n        i++;\n    })\n    }\nmsg.options = options;\nflow.set(\"Assets\", msg.payload.data);\nreturn msg;\n",
+        "func": "var options = [];\nvar name;\nvar i = 0;\nif (msg.payload.links.length != 0) {\n    msg.payload.data.forEach(data => {\n        name = data.attributes.label\n        options.push({ [name]: i });\n        i++;\n    })\n    }\nmsg.options = options;\nflow.set(\"AssetTypes\", msg.payload.data);\nreturn msg;\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1989,7 +1997,7 @@
         "z": "c884171d9a258ae0",
         "g": "c7636ef23a97b475",
         "name": "Store Flag Types",
-        "func": "var options = [];\nvar name;\nvar i = 0;\nif (msg.payload.links.length != 0) {\n    msg.payload.data.forEach(data => {\n        name = data.attributes.label\n        options.push({ [name]: i });\n        i++;\n    })\n    }\nmsg.options = options;\nflow.set(\"Flags\", msg.payload.data);\nreturn msg;\n",
+        "func": "var options = [];\nvar name;\nvar id;\nif (msg.payload.data.length != 0) {\n    msg.payload.data.forEach(data => {\n        name = data.attributes.label;\n        id = data.attributes.drupal_internal__id;\n        options.push({ [name]: id });\n    })\n}\nmsg.options = options;\nflow.set(\"Flags\", msg.payload.data);\nreturn msg;\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -2014,14 +2022,14 @@
         "width": 0,
         "height": 0,
         "passthru": true,
-        "topic": "payload",
+        "topic": "topic",
         "topicType": "msg",
         "className": "",
         "x": 2130,
         "y": 640,
         "wires": [
             [
-                "96ec8e50eefab0d1"
+                "3a48ac894797834b"
             ]
         ]
     },
@@ -2067,7 +2075,7 @@
             "761fb0634b314ea2"
         ],
         "x": 2025,
-        "y": 940,
+        "y": 960,
         "wires": [
             [
                 "41197f6324ca8fb7"
@@ -2143,7 +2151,7 @@
             "c1ac4c4944b846a1"
         ],
         "x": 2025,
-        "y": 980,
+        "y": 1000,
         "wires": [
             [
                 "446ae1616b72874b"
@@ -2884,8 +2892,8 @@
         "links": [
             "a7efe282f8f59e02"
         ],
-        "x": 2285,
-        "y": 520,
+        "x": 2295,
+        "y": 560,
         "wires": []
     },
     {
@@ -2920,7 +2928,7 @@
         "z": "c884171d9a258ae0",
         "name": "",
         "events": "change",
-        "x": 2320,
+        "x": 2340,
         "y": 760,
         "wires": [
             [
@@ -2968,7 +2976,7 @@
         "order": 2,
         "width": 0,
         "height": 0,
-        "passthru": true,
+        "passthru": false,
         "multiple": true,
         "options": [
             {
@@ -2982,23 +2990,25 @@
         "topicType": "msg",
         "className": "",
         "x": 2160,
-        "y": 860,
+        "y": 880,
         "wires": [
-            []
+            [
+                "24f56ad7345ef4b6"
+            ]
         ]
     },
     {
         "id": "04f91f88fd30281b",
         "type": "function",
         "z": "c884171d9a258ae0",
-        "name": "Store Asset Type",
-        "func": "var i = msg.payload;\nvar assets = flow.get(\"Assets\");\nvar QL_AssetType = \"asset--\" + assets[i].attributes.drupal_internal__id;\nflow.set(\"QL_AssetType\", QL_AssetType);\nreturn msg;",
+        "name": "Save Asset Type",
+        "func": "var i = msg.payload;\nvar assets = flow.get(\"AssetTypes\");\nvar QL_AssetType = \"asset--\" + assets[i].attributes.drupal_internal__id;\nflow.set(\"QL_AssetType\", QL_AssetType);\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 2350,
+        "x": 2370,
         "y": 720,
         "wires": [
             []
@@ -3008,32 +3018,15 @@
         "id": "fb8ad752d9a72b89",
         "type": "function",
         "z": "c884171d9a258ae0",
-        "name": "Store Log Type",
+        "name": "Save Log Type",
         "func": "var i = msg.payload;\nvar logs = flow.get(\"Logs\");\nvar QL_LogType = logs[i].attributes.drupal_internal__id;\nflow.set(\"QL_LogType\", QL_LogType);\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 2340,
+        "x": 2360,
         "y": 680,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "96ec8e50eefab0d1",
-        "type": "function",
-        "z": "c884171d9a258ae0",
-        "name": "Store Date",
-        "func": "flow.set(\"QL_Timestamp\", msg.payload);\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2330,
-        "y": 640,
         "wires": [
             []
         ]
@@ -3065,12 +3058,11 @@
                 "type": "str"
             }
         ],
-        "x": 1790,
-        "y": 860,
+        "x": 1970,
+        "y": 840,
         "wires": [
             [
-                "fe58cb409ca68f66",
-                "c3289f8019d486b1"
+                "fe58cb409ca68f66"
             ]
         ]
     },
@@ -3079,35 +3071,19 @@
         "type": "function",
         "z": "c884171d9a258ae0",
         "name": "Select Assets",
-        "func": "var options = [];\nvar name;\nvar i = 0;\nif (msg.payload.data.length != 0) {\n    msg.payload.data.forEach(data => {\n        name = data.attributes.name\n        options.push({ [name]: i });\n        i++;\n    })\n}\nmsg.options = options;\n//flow.set(\"Land\", msg.payload.data);\nreturn msg;",
+        "func": "var options = [];\nvar name;\nvar id;\nif (msg.payload.data.length != 0) {\n    msg.payload.data.forEach(data => {\n        name = data.attributes.name;\n        id = data.id;\n        options.push({ [name]: id });\n    })\n}\nmsg.options = options;\nflow.set(\"QL_Assets\", msg.payload.data);\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1980,
-        "y": 860,
+        "x": 1960,
+        "y": 880,
         "wires": [
             [
                 "ac0280eaac2e3309"
             ]
         ]
-    },
-    {
-        "id": "c3289f8019d486b1",
-        "type": "debug",
-        "z": "c884171d9a258ae0",
-        "name": "debug 15",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1840,
-        "y": 960,
-        "wires": []
     },
     {
         "id": "57c46b83f500a4e6",
@@ -3128,8 +3104,8 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 2600,
-        "y": 1100,
+        "x": 2540,
+        "y": 1120,
         "wires": [
             [
                 "7b4ff57604f1609c",
@@ -3143,10 +3119,215 @@
         "z": "c884171d9a258ae0",
         "name": "",
         "events": "change",
-        "x": 2580,
-        "y": 1140,
+        "x": 2520,
+        "y": 1160,
         "wires": [
             []
+        ]
+    },
+    {
+        "id": "24f56ad7345ef4b6",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Save Selected Assets",
+        "func": "var asset_id = msg.payload;\nvar asset_type = flow.get(\"QL_AssetType\");\nvar array = [];\n\nasset_id.forEach(data => {\n    asset_id = data;\n    array.push({ type: asset_type, id: asset_id })\n})\n\nflow.set(\"QL_AssetSelection\", array);\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2380,
+        "y": 880,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "83291ef30e86c815",
+        "type": "change",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "rules": [
+            {
+                "t": "delete",
+                "p": "AssetsTypes",
+                "pt": "flow"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 2390,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "cb23aaa23e8fe4ed",
+        "type": "inject",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 2150,
+        "y": 100,
+        "wires": [
+            [
+                "83291ef30e86c815"
+            ]
+        ]
+    },
+    {
+        "id": "e8cc39d203bf227a",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Save Selected Flags",
+        "func": "var flags = msg.payload;\nvar array = [];\nvar name\n\nflags.forEach(data => {\n    name = data;\n    array.push( name )\n})\n\nflow.set(\"QL_FlagSelection\", array);\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2380,
+        "y": 1000,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5f5166f6e6537a46",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Save Location",
+        "func": "var asset_id = msg.payload;\nvar array = [];\n\nasset_id.forEach(data => {\n    asset_id = data;\n    array.push({ type: \"asset--land\", id: asset_id })\n})\n\nflow.set(\"QL_LandSelection\", array);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2360,
+        "y": 960,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "3a48ac894797834b",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "SaveTimestamp",
+        "func": "flow.set(\"QL_Timestamp\", msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2360,
+        "y": 640,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d19d35cd9e0787b8",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Save Log Name",
+        "func": "flow.set(\"QL_LogName\", msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2360,
+        "y": 920,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "9d18ac4ca57f6303",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Save Status",
+        "func": "flow.set(\"QL_Status\", msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2350,
+        "y": 1040,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e6e80178899976a0",
+        "type": "function",
+        "z": "c884171d9a258ae0",
+        "name": "Post Log",
+        "func": "var notes = msg.payload;\nvar LogType = flow.get(\"QL_LogType\");\nvar LogName = flow.get(\"QL_LogName\");\nvar Timestamp = flow.get(\"QL_Timestamp\"); \nvar FlagSelection = flow.get(\"QL_FlagSelection\");\nvar AssetSelection = flow.get(\"QL_AssetSelection\");\nvar Status = flow.get(\"QL_Status\");\nvar LandSelection = flow.get(\"QL_LandSelection\");\n\nTimestamp = new Date(Timestamp).toLocaleDateString('en-UK');\n\n//Time + Date formatting\nfunction padZero(i) {\n    return i < 10 ? \"0\" + i : i;\n}\nconst dateString = Timestamp;\nconst parts = dateString.split(\"/\");\nconst date = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));\nconst newDateString = date.getFullYear() + '-' + (padZero(date.getMonth() + 1)) + '-' + padZero(date.getDate());\n\nmsg.payload = {\n    \"data\": {\n        \"type\": \"log--\" + LogType,\n        \"attributes\": {\n        \"name\": LogName,\n            \"status\": Status,\n        \"notes\": notes,\n            \"timestamp\": newDateString + \"T00:00:00+00:00\",\n        \"flag\": FlagSelection,\n\n  },\n        \"relationships\": {\n            \"asset\": {\n                \"data\": AssetSelection\n            },\n        \"location\": {\n            \"data\": LandSelection\n            }\n        }\n    }   \n}\nvar token = global.get('token');\nmsg.headers = {};\nmsg.headers['Authorization'] = \"Bearer \" + token;\nmsg.headers['Accept'] = \"application/vnd.api+json\";\nmsg.headers['content-type'] = 'application/vnd.api+json';\nmsg.url = global.get('farmOSurl').concat('/api/log/' + LogType)\nmsg.method = \"POST\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2320,
+        "y": 1120,
+        "wires": [
+            [
+                "57c46b83f500a4e6",
+                "a4a343f2e40c5ab6"
+            ]
+        ]
+    },
+    {
+        "id": "9c2d14a9bfb7d6b7",
+        "type": "debug",
+        "z": "c884171d9a258ae0",
+        "name": "debug 15",
+        "active": true,
+        "tosidebar": false,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2520,
+        "y": 1200,
+        "wires": []
+    },
+    {
+        "id": "a4a343f2e40c5ab6",
+        "type": "http request",
+        "z": "c884171d9a258ae0",
+        "name": "",
+        "method": "use",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 2310,
+        "y": 1160,
+        "wires": [
+            [
+                "9c2d14a9bfb7d6b7"
+            ]
         ]
     },
     {

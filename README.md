@@ -5,6 +5,7 @@ This will make some flows available "off-line" and also allow easy integration w
 
 ### Current Features:
 1. Inventory usage tracking.
+2. Quick Log
 
 ### In Progress
 1. Bale recording direct from baler counter 
@@ -13,3 +14,5 @@ This will make some flows available "off-line" and also allow easy integration w
 
 
 ![alt text](https://github.com/Farmer-Eds-Shed/farmOS-Node-Red-Android-Project/blob/main/screenshots/InventoryUI.gif?raw=true)
+![alt text](![image](https://user-images.githubusercontent.com/63633329/211165033-1d4eacec-6e03-4c7e-b982-17895837e5d3.png)
+

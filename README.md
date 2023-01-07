@@ -14,5 +14,5 @@ This will make some flows available "off-line" and also allow easy integration w
 
 
 ![alt text](https://github.com/Farmer-Eds-Shed/farmOS-Node-Red-Android-Project/blob/main/screenshots/InventoryUI.gif?raw=true)
-![alt text](https://user-images.githubusercontent.com/63633329/211165033-1d4eacec-6e03-4c7e-b982-17895837e5d3.png)
+![alt text](https://github.com/Farmer-Eds-Shed/farmOS-Node-Red-Android-Project/blob/main/screenshots/chrome_SgC2uWGODs.gif?raw=true)
 
